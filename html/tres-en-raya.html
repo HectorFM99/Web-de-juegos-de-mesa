@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tres en raya — La Sobremesa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/game.css">
+    <script src="../js/game.js" defer>
+    </script>
+      <link rel="stylesheet" href="../css/theme.css">
+    <script src="../js/theme.js" defer></script>
+  </head>
+  <body data-game="tic-tac-toe">
+    <header class="game-header">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark">✳</span>
+        <span>la sobremesa<small>JUEGOS PARA COMPARTIR</small>
+        </span>
+      </a>
+      <a class="back-link" href="../index.html#juegos">← Volver a los juegos</a>
+          <button class="theme-toggle" type="button" aria-pressed="false"><span aria-hidden="true">☾</span> Modo oscuro</button>
+    </header>
+    <main class="game-page">
+      <section class="game-heading">
+        <p class="eyebrow">RÁPIDO · 2 JUGADORES</p>
+        <h1>Tres en raya</h1>
+        <p>Tres símbolos en línea. Una revancha siempre cabe.</p>
+      </section>
+      <section class="play-area">
+        <div class="game-toolbar">
+          <p id="status" aria-live="polite">Turno de X</p>
+          <button class="reset-button" id="reset">Nueva partida</button>
+        </div>
+        <div id="board" class="board tic-board" aria-label="Tablero de tres en raya">
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

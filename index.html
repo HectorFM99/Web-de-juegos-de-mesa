@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#f5f0e5">
+    <meta name="description" content="Juegos de mesa para compartir, sin importar la distancia.">
+    <title>La Sobremesa — Juegos para compartir</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/script.js" defer>
+    </script>
+      <link rel="stylesheet" href="css/theme.css">
+    <script src="js/theme.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#inicio">
+      <span class="brand-mark">✳</span>
+      <span>la sobremesa<small>JUEGOS PARA COMPARTIR</small>
+      </span>
+      </a>
+      <nav class="main-nav">
+        <a href="#juegos">Juegos</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#sobre-nosotros">La idea</a>
+      </nav>
+      <a class="nav-cta" href="#juegos">Busca tu partida <span>↗</span>
+      </a>
+          <button class="theme-toggle" type="button" aria-pressed="false"><span aria-hidden="true">☾</span> Modo oscuro</button>
+    </header>
+    <main id="inicio">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">
+            <i>
+            </i> TU MESA, DONDE QUIERA QUE ESTÉS</p>
+            <h1>Una mesa siempre<br>lista para <em>jugar.</em>
+            </h1>
+            <p class="hero-description">Reúne a los tuyos, acerca las sillas y deja que la partida empiece. Juegos de mesa para compartir, sin importar la distancia.</p>
+            <a class="button button-dark" href="#juegos">Encuentra tu próximo juego <span>↓</span>
+            </a>
+            <div class="hero-note">
+              <div class="avatar-stack">
+                <i>♟</i>
+                <i>♥</i>
+                <i>✿</i>
+              </div>
+              <span>Hecho para compartir<br>
+              <strong>Una partida a la vez</strong>
+              </span>
+            </div>
+          </div>
+          <div class="hero-art" aria-label="Ilustración de una mesa de juegos acogedora">
+            <div class="sun">
+            </div>
+            <div class="art-label">SACA LAS FICHAS<br>Y SIRVE EL CAFÉ</div>
+            <div class="table">
+              <div class="table-ring">
+              </div>
+              <div class="card card-one">♠<small>A</small>
+              </div>
+              <div class="card card-two">♥<small>7</small>
+              </div>
+              <div class="die">⚄</div>
+              <div class="meeple">♟</div>
+              <div class="flower">✿</div>
+              <div class="cup">
+              </div>
+            </div>
+            <span class="art-caption">Ilustración de sobremesa, 01</span>
+          </div>
+          <div class="hero-bottom">
+            <span>UN BUEN PLAN NO NECESITA MÁS</span>
+            <span>⌄</span>
+            <span>01 — 03</span>
+          </div>
+        </section>
+        <section class="games section-wrap" id="juegos">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">ELIGE TU PARTIDA</p>
+              <h2>Juegos sobre la mesa<span>.</span>
+              </h2>
+            </div>
+            <p class="section-intro">Un clásico para entrar en calor o una aventura para alargar la noche. Hay sitio para todos.</p>
+          </div>
+          <div class="toolbar">
+            <label class="search-box">
+            <span>⌕</span>
+            <input id="game-search" type="search" placeholder="¿Qué te apetece jugar?" aria-label="Buscar juegos">
+            </label>
+            <div class="filters" role="group" aria-label="Filtrar juegos">
+              <button class="filter active" data-filter="todos">Todos <span>06</span>
+              </button>
+              <button class="filter" data-filter="estrategia">Estrategia</button>
+              <button class="filter" data-filter="cartas">Cartas</button>
+              <button class="filter" data-filter="rapido">Rápidos</button>
+            </div>
+            <span class="game-count" id="game-count">6 juegos</span>
+          </div>
+          <div class="game-grid" id="game-grid">
+            <article class="game-card" data-category="estrategia" data-name="ajedrez estrategia clásico">
+              <div class="game-art art-chess">
+                <span class="art-index">01 / CLÁSICO</span>
+                <span class="chess-piece">♞</span>
+                <span class="art-stamp">DESDE<br>SIEMPRE</span>
+              </div>
+              <div class="game-info">
+                <div>
+                  <p class="game-type">ESTRATEGIA · 2 JUGADORES</p>
+                  <h3>Ajedrez</h3>
+                </div>
+                <a href="html/ajedrez.html" class="play-link" aria-label="Jugar al Ajedrez">↗</a>
+              </div>
+              <p class="game-description">Cada movimiento cuenta. Un clásico que nunca se queda sin historias.</p>
+            </article>
+            <article class="game-card" data-category="cartas" data-name="solitario cartas tranquilo">
+              <div class="game-art art-solitaire">
+                <span class="art-index">02 / A TU RITMO</span>
+                <div class="mini-card">♣<small>Q</small>
+                </div>
+                <div class="mini-card mini-card-back">✳</div>
+                <div class="mini-card mini-card-last">♦<small>8</small>
+                </div>
+              </div>
+              <div class="game-info">
+                <div>
+                  <p class="game-type">CARTAS · 1 JUGADOR</p>
+                  <h3>Solitario</h3>
+                </div>
+                <a href="html/solitario.html" class="play-link" aria-label="Jugar al Solitario">↗</a>
+              </div>
+              <p class="game-description">Una pausa tranquila y una baraja para ordenar el día.</p>
+            </article>
+            <article class="game-card" data-category="estrategia" data-name="damas estrategia">
+              <div class="game-art art-checkers">
+                <span class="art-index">03 / CARA A CARA</span>
+                <div class="checker-board">
+                  <b>
+                  </b>
+                  <b>
+                  </b>
+                  <b>
+                  </b>
+                  <b>
+                  </b>
+                  <b>
+                  </b>
+                  <b>
+                  </b>
+                  <b>
+                  </b>
+                  <b>
+                  </b>
+                </div>
+              </div>
+              <div class="game-info">
+                <div>
+                  <p class="game-type">ESTRATEGIA · 2 JUGADORES</p>
+                  <h3>Damas</h3>
+                </div>
+                <a href="html/damas.html" class="play-link" aria-label="Jugar a las Damas">↗</a>
+              </div>
+              <p class="game-description">Reglas sencillas, buenos piques y revancha asegurada.</p>
+            </article>
+            <article class="game-card" data-category="rapido" data-name="tres en raya rápido clásico">
+              <div class="game-art art-tic">
+                <span class="art-index">04 / UNA MÁS</span>
+                <div class="tic-grid">
+                  <i>×</i>
+                  <i>○</i>
+                  <i>×</i>
+                  <i>○</i>
+                  <i>×</i>
+                  <i>
+                  </i>
+                  <i>
+                  </i>
+                  <i>○</i>
+                  <i>×</i>
+                </div>
+              </div>
+              <div class="game-info">
+                <div>
+                  <p class="game-type">RÁPIDO · 2 JUGADORES</p>
+                  <h3>Tres en raya</h3>
+                </div>
+                <a href="html/tres-en-raya.html" class="play-link" aria-label="Jugar al Tres en raya">↗</a>
+              </div>
+              <p class="game-description">La partida perfecta mientras llega el café.</p>
+            </article>
+            <article class="game-card" data-category="rapido" data-name="conecta cuatro rápido estrategia">
+              <div class="game-art art-connect">
+                <span class="art-index">05 / AL MEJOR DE TRES</span>
+                <div class="connect-board">
+                  <i>●</i>
+                  <i>●</i>
+                  <i>●</i>
+                  <i>●</i>
+                  <i>●</i>
+                  <i>●</i>
+                  <i>●</i>
+                  <i>●</i>
+                  <i>●</i>
+                  <i>●</i>
+                  <i>●</i>
+                  <i>●</i>
+                </div>
+              </div>
+              <div class="game-info">
+                <div>
+                  <p class="game-type">RÁPIDO · 2 JUGADORES</p>
+                  <h3>Conecta 4</h3>
+                </div>
+                <a href="html/conecta-4.html" class="play-link" aria-label="Jugar a Conecta 4">↗</a>
+              </div>
+              <p class="game-description">Cuatro en línea. Parece fácil hasta que te toca.</p>
+            </article>
+            <article class="game-card" data-category="cartas" data-name="memoria cartas familiar">
+              <div class="game-art art-memory">
+                <span class="art-index">06 / PARA TODAS LAS EDADES</span>
+                <div class="memory-cards">
+                  <i>✿</i>
+                  <i>✳</i>
+                  <i>✿</i>
+                  <i>❋</i>
+                </div>
+              </div>
+              <div class="game-info">
+                <div>
+                  <p class="game-type">CARTAS · 1–4 JUGADORES</p>
+                  <h3>Memoria</h3>
+                </div>
+                <a href="html/memoria.html" class="play-link" aria-label="Jugar a Memoria">↗</a>
+              </div>
+              <p class="game-description">Voltea, recuerda y encuentra las parejas escondidas.</p>
+            </article>
+          </div>
+          <p class="empty-state" id="empty-state" hidden>No encontramos ese juego. Prueba con otra búsqueda.</p>
+        </section>
+        <section class="how section-wrap" id="como-funciona">
+          <div class="how-title">
+            <p class="eyebrow">SIN COMPLICACIONES</p>
+            <h2>De aquí a la<br>primera partida.</h2>
+          </div>
+          <div class="steps">
+            <article>
+              <span>01</span>
+              <h3>Elige el juego</h3>
+              <p>Busca un clásico o encuentra algo nuevo que probar.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Junta a tu gente</h3>
+              <p>Comparte el enlace y ocupa tu sitio alrededor de la mesa.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>Que empiece la partida</h3>
+              <p>Las reglas están claras. Lo demás lo ponen ustedes.</p>
+            </article>
+          </div>
+        </section>
+        <section class="closing section-wrap" id="sobre-nosotros">
+          <div class="closing-mark">✳</div>
+          <p class="eyebrow">LA SOBREMESA</p>
+          <h2>Lo bonito siempre<br>es <em>jugar juntos.</em>
+          </h2>
+          <p>Un rincón sencillo para compartir buenos juegos y mejores ratos.</p>
+          <a href="#juegos" class="button button-light">Volver a los juegos <span>↑</span>
+          </a>
+          <span class="closing-scribble">hecho con calma &amp; cariño</span>
+        </section>
+      </main>
+      <footer>
+        <a class="brand footer-brand" href="#inicio">
+        <span class="brand-mark">✳</span>
+        <span>la sobremesa<small>JUEGOS PARA COMPARTIR</small>
+        </span>
+        </a>
+        <span>Una mesa, muchas historias.</span>
+        <span>© 2025 La Sobremesa</span>
+      </footer>
+    </body>
+  </html>

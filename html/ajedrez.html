@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ajedrez — La Sobremesa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/game.css">
+    <script src="../js/game.js" defer>
+    </script>
+      <link rel="stylesheet" href="../css/theme.css">
+    <script src="../js/theme.js" defer></script>
+  </head>
+  <body data-game="chess">
+    <header class="game-header">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark">✳</span>
+        <span>la sobremesa<small>JUEGOS PARA COMPARTIR</small>
+        </span>
+      </a>
+      <a class="back-link" href="../index.html#juegos">← Volver a los juegos</a>
+          <button class="theme-toggle" type="button" aria-pressed="false"><span aria-hidden="true">☾</span> Modo oscuro</button>
+    </header>
+    <main class="game-page">
+      <section class="game-heading">
+        <p class="eyebrow">ESTRATEGIA · 2 JUGADORES</p>
+        <h1>Ajedrez</h1>
+        <p>Piensa tu próximo movimiento y conquista el tablero.</p>
+      </section>
+      <section class="play-area">
+        <div class="game-toolbar">
+          <p id="status" aria-live="polite">Turno de blancas</p>
+          <button class="reset-button" id="reset">Nueva partida</button>
+        </div>
+        <div id="board" class="board chess-board" aria-label="Tablero de ajedrez">
+        </div>
+        <p class="game-help">Selecciona una pieza y luego su casilla de destino. Reglas de movimiento básicas.</p>
+      </section>
+    </main>
+  </body>
+</html>
