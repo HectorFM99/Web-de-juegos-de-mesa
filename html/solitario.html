@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Solitario — La Sobremesa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/game.css">
+    <script src="../js/game.js" defer>
+    </script>
+      <link rel="stylesheet" href="../css/theme.css">
+    <script src="../js/theme.js" defer></script>
+  </head>
+  <body data-game="solitaire">
+    <header class="game-header">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark">✳</span>
+        <span>la sobremesa<small>JUEGOS PARA COMPARTIR</small>
+        </span>
+      </a>
+      <a class="back-link" href="../index.html#juegos">← Volver a los juegos</a>
+          <button class="theme-toggle" type="button" aria-pressed="false"><span aria-hidden="true">☾</span> Modo oscuro</button>
+    </header>
+    <main class="game-page">
+      <section class="game-heading">
+        <p class="eyebrow">CARTAS · 1 JUGADOR</p>
+        <h1>Solitario</h1>
+        <p>Ordena las cartas por palo desde el as hasta el rey.</p>
+      </section>
+      <section class="play-area solitaire-area">
+        <div class="game-toolbar">
+          <p id="status" aria-live="polite">Robá una carta para empezar.</p>
+          <button class="reset-button" id="reset">Nueva partida</button>
+        </div>
+        <div id="board" class="solitaire-board" aria-label="Mesa de solitario">
+        </div>
+        <p class="game-help">Mueve cartas entre columnas alternando colores y en orden descendente. Los ases van a las bases.</p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,119 @@
+/* Control compartido de tema */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid var(--line, #d8d0bf);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: 600 10px var(--sans, Arial, sans-serif);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.theme-toggle:hover {
+  border-color: var(--rust, #b56445);
+}
+
+body[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #22251f;
+  --paper-dark: #30342b;
+  --ink: #eee7d8;
+  --muted: #b4b09f;
+  --green: #b4c09d;
+  --green-dark: #354b39;
+  --line: #494a3e;
+  background: #22251f;
+  color: #eee7d8;
+}
+
+body[data-theme="dark"] .topbar,
+body[data-theme="dark"] .game-header {
+  border-color: #494a3e;
+}
+
+body[data-theme="dark"] .main-nav,
+body[data-theme="dark"] .hero-description,
+body[data-theme="dark"] .hero-note,
+body[data-theme="dark"] .section-intro,
+body[data-theme="dark"] .game-description,
+body[data-theme="dark"] .steps p,
+body[data-theme="dark"] .game-heading > p:last-child,
+body[data-theme="dark"] .game-help,
+body[data-theme="dark"] footer {
+  color: #b4b09f;
+}
+
+body[data-theme="dark"] .games {
+  background: #2b2e27;
+}
+
+body[data-theme="dark"] .toolbar,
+body[data-theme="dark"] .steps article {
+  border-color: #494a3e;
+}
+
+body[data-theme="dark"] .search-box input {
+  color: #eee7d8;
+}
+
+body[data-theme="dark"] .play-area {
+  border-color: #494a3e;
+  background: #2b2e27;
+}
+
+body[data-theme="dark"] .tic-board {
+  background: #494a3e;
+}
+
+body[data-theme="dark"] .tic-cell {
+  background: #34372f;
+}
+
+body[data-theme="dark"] .memory-card.revealed,
+body[data-theme="dark"] .memory-card.matched,
+body[data-theme="dark"] .playing-card {
+  border-color: #62604f;
+  background: #e9dfca;
+  color: #292b23;
+}
+
+body[data-theme="dark"] .solitaire-pile {
+  border-color: #65604e;
+}
+
+body[data-theme="dark"] .pile-title {
+  color: #c1b99f;
+}
+
+body[data-theme="dark"] .closing {
+  background: #18251b;
+}
+
+body[data-theme="dark"] .hero-note strong,
+body[data-theme="dark"] .game-info h3,
+body[data-theme="dark"] .steps h3,
+body[data-theme="dark"] .brand,
+body[data-theme="dark"] .footer-brand {
+  color: #eee7d8;
+}
+
+@media (max-width: 600px) {
+  .theme-toggle {
+    padding: 7px 9px;
+    gap: 0;
+    font-size: 0;
+  }
+
+  .theme-toggle span {
+    font-size: 16px;
+  }
+
+  .game-header .back-link {
+    font-size: 9px;
+  }
+}
