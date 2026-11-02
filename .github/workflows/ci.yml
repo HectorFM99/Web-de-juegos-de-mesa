@@ -1,0 +1,28 @@
+name: JavaScript syntax
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check-javascript:
+    name: Check JavaScript syntax
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate JavaScript files
+        run: |
+          node --check js/game.js
+          node --check js/script.js
+          node --check js/theme.js

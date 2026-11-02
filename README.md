@@ -43,9 +43,13 @@ Abre `index.html` en un navegador moderno. La web es estática y no necesita com
 │   ├── script.js              # Búsqueda y filtros del catálogo
 │   ├── game.js                # Lógica de las partidas
 │   └── theme.js               # Selector de tema y preferencia guardada
-├── .github/workflows/         # Análisis automático en GitHub Actions
+├── .github/workflows/         # Comprobaciones, build Docker y SonarQube
 └── sonar-project.properties   # Alcance de análisis de SonarQube
 ```
+
+## Integración continua
+
+GitHub Actions valida la sintaxis de los tres archivos JavaScript y comprueba que Docker pueda construir la imagen del sitio. Estas comprobaciones se ejecutan en `push` y en las pull requests.
 
 ## SonarQube
 
