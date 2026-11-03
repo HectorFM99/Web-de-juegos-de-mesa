@@ -1,6 +1,6 @@
 const game = document.body?.dataset?.game;
 const board = document.querySelector('#board');
-const status = document.querySelector('#status');
+const statusEl = document.querySelector('#status');
 const resetButton = document.querySelector('#reset');
 
 const symbols = ['✿', '✳', '❋', '❀', '☼', '♧', '❈', '✾'];
@@ -21,7 +21,7 @@ const chessGlyphs = {
 let state;
 
 function setStatus(message) {
-  if (status) status.textContent = message;
+  if (statusEl) statusEl.textContent = message;
 }
 
 function reset() {
