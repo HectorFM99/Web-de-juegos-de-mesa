@@ -1,4 +1,4 @@
-const game = document.body.dataset.game;
+const game = document.body?.dataset?.game;
 const board = document.querySelector('#board');
 const status = document.querySelector('#status');
 const resetButton = document.querySelector('#reset');
@@ -21,10 +21,11 @@ const chessGlyphs = {
 let state;
 
 function setStatus(message) {
-  status.textContent = message;
+  if (status) status.textContent = message;
 }
 
 function reset() {
+  if (!board) return;
   if (game === 'tic-tac-toe') startTicTacToe();
   if (game === 'connect-four') startConnectFour();
   if (game === 'memory') startMemory();
@@ -33,7 +34,9 @@ function reset() {
   if (game === 'solitaire') startSolitaire();
 }
 
-resetButton.addEventListener('click', reset);
+if (resetButton) {
+  resetButton.addEventListener('click', reset);
+}
 
 function winnerLine(cells, size, length, row, column, player, directions) {
   return directions.some(([dr, dc]) => {

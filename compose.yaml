@@ -3,3 +3,16 @@ services:
     build: .
     ports:
       - "8079:80"
+    restart: unless-stopped
+    # --- AVAILABILITY: Resource limits against DoS / resource exhaustion ---
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.10'
+          memory: 64M
+    # --- INTEGRITY: Prevent privilege escalation ---
+    security_opt:
+      - no-new-privileges:true

@@ -9,7 +9,12 @@ function applyTheme(theme) {
   themeButton.setAttribute('aria-label', `Cambiar a modo ${isDark ? 'claro' : 'oscuro'}`);
   const icon = isDark ? '☀' : '☾';
   const label = isDark ? 'claro' : 'oscuro';
-  themeButton.innerHTML = `<span aria-hidden="true">${icon}</span> Modo ${label}`;
+  
+  themeButton.replaceChildren();
+  const spanIcon = document.createElement('span');
+  spanIcon.setAttribute('aria-hidden', 'true');
+  spanIcon.textContent = icon;
+  themeButton.append(spanIcon, ` Modo ${label}`);
 
   const themeColor = document.querySelector('meta[name="theme-color"]');
   themeColor?.setAttribute('content', isDark ? '#22251f' : '#f5f0e5');
