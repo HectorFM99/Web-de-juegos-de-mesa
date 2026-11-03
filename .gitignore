@@ -1,3 +1,2 @@
-node_modules/
-.vscode/
-.scannerwork/
+node_modules
+.vscode
