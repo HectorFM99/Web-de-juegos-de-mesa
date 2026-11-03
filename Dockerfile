@@ -1,2 +1,4 @@
 FROM nginx:alpine
-COPY . /usr/share/nginx/html
+
+# Copiar archivos estáticos de forma segura para Nginx (solo lectura recomendada para producción)
+COPY --chown=root:root . /usr/share/nginx/html
