@@ -27,28 +27,25 @@
 │   ├── theme.js               # Control de preferencias de tema
 │   └── contador.js            # Utilidades de conteo
 ├── Dockerfile                 # Configuración de Nginx para producción
-├── compose.yaml               # Orquestación con Docker Compose
+├── compose.yaml               # Orquestación y límites de recursos
 └── sonar-project.properties   # Configuración de análisis estático SonarCloud
 ```
 
-## 🚀 Cómo Ejecutar en Local
+## 🐳 Uso de Docker en el Proyecto
 
-### Opción 1: Con Docker (Recomendado)
-Asegúrate de tener Docker y Docker Compose instalados. Ejecuta desde la raíz del proyecto:
+En este proyecto, **Docker** se ha utilizado para empaquetar la aplicación web estática en un contenedor ligero basado en **Nginx (`nginx:alpine`)**. 
+- Permite servir el contenido de forma idéntica en cualquier entorno de producción.
+- Incorpora políticas de seguridad estrictas, como asegurar que los archivos estáticos tengan permisos de solo lectura propiedad de `root` dentro del contenedor.
+- Se complementa con **Docker Compose (`compose.yaml`)** para definir límites de recursos (CPU y memoria) y políticas de reinicio automático, garantizando estabilidad y aislamiento.
 
-```sh
-docker compose up --build
-```
+## 🔍 Análisis de Calidad con SonarQube / SonarCloud
 
-Abre en tu navegador: [http://localhost:8079](http://localhost:8079). Para detener el servidor, pulsa `Ctrl+C` o ejecuta `docker compose down`.
+**SonarCloud** se ha integrado en el flujo de trabajo del proyecto para realizar **análisis estáticos de código** automatizados en cada integración continua (CI) mediante GitHub Actions.
+- Evalúa de forma continua la calidad del código, detectando posibles *code smells*, duplicidades y vulnerabilidades de seguridad.
+- Actúa como puerta de calidad (*Quality Gate*) obligatoria, impidiendo que cambios con deficiencias entren en la rama principal.
+- Ayuda a mantener buenas prácticas de desarrollo y un estándar profesional en toda la base de código frontend.
 
-### Opción 2: Sin Docker (Archivos estáticos)
-Al ser una aplicación web estática pura (HTML, CSS y JS vainilla), puedes abrir directamente `index.html` en cualquier navegador moderno o servirla con cualquier servidor web estático (como Live Server en VS Code).
+## 🛠️ Desarrollo
 
----
-
-## 🛠️ Desarrollo y Calidad de Código
-
-- **Linters:** Se utiliza ESLint para JavaScript y HTMLHint para validación HTML (`npm run lint`).
-- **Integración Continua:** GitHub Actions valida linters, construcción de Docker y análisis de calidad en cada `push` y Pull Request.
-- **Análisis Estático (SonarCloud):** Configurado para revisar la calidad del código, mantenibilidad y seguridad.
+- **Linters:** Validación estricta de HTML (`HTMLHint`) y JavaScript (`ESLint`) ejecutados localmente y en CI (`npm run lint`).
+- **Integración Continua:** GitHub Actions automatiza la verificación de linters, pruebas, compilación de contenedores y validación de calidad.
