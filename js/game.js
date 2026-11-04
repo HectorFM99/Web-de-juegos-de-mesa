@@ -92,7 +92,7 @@ function startTicTacToe() {
 }
 
 function startConnectFour() {
-  state = { cells: Array.from({ length: 6 }, () => Array(7).fill('')), turn: 'red', done: false };
+  state = { cells: Array.from({ length: 6 }, () => new Array(7).fill('')), turn: 'red', done: false };
   board.replaceChildren();
   for (let r = 0; r < 6; r++) for (let c = 0; c < 7; c++) {
     const cell = document.createElement('button');
@@ -177,7 +177,7 @@ function startMemory() {
 }
 
 function startCheckers() {
-  state = { cells: Array(64).fill(null), turn: 'red', selected: null, done: false };
+  state = { cells: new Array(64).fill(null), turn: 'red', selected: null, done: false };
   for (let row = 0; row < 3; row++) {
     for (let column = 0; column < 8; column++) {
       if ((row + column) % 2) {
@@ -196,53 +196,48 @@ function startCheckers() {
   setStatus('Turno de rojas');
 }
 
-function checkMoves(index) {
+function checkerDirections(piece) {
+  if (piece.king) return [-1, 1];
+  return [piece.side === 'red' ? -1 : 1];
+}
+
+function checkerMovesFor(index) {
   const piece = state.cells[index];
   if (!piece) return [];
   const row = Math.floor(index / 8), col = index % 8;
-  const forward = piece.side === 'red' ? -1 : 1;
-  const directions = piece.king ? [-1, 1] : [forward];
-  const captures = [], moves = [];
-  for (const dr of directions) for (const dc of [-1, 1]) {
-    const r = row + dr, c = col + dc;
-    if (r < 0 || r > 7 || c < 0 || c > 7) continue;
-    const next = r * 8 + c;
-    if (!state.cells[next]) moves.push({ to: next });
-    else if (state.cells[next].side !== piece.side) {
-      const rr = r + dr, cc = c + dc;
-      if (rr >= 0 && rr < 8 && cc >= 0 && cc < 8 && !state.cells[rr * 8 + cc]) {
-        captures.push({ to: rr * 8 + cc, take: next });
-      }
+  const moves = [];
+  for (const dr of checkerDirections(piece)) {
+    for (const dc of [-1, 1]) {
+      addCheckerMove(moves, piece, row + dr, col + dc, dr, dc);
     }
   }
-  const anyCapture = state.cells.some((piece, i) => {
-    const canCapture = checkMovesRaw(i).some((move) => move.take !== undefined);
-    return piece?.side === state.turn && canCapture;
-  });
-  const options = captures.length ? captures : moves;
+  return moves;
+}
+
+function addCheckerMove(moves, piece, row, col, dr, dc) {
+  if (row < 0 || row > 7 || col < 0 || col > 7) return;
+  const next = row * 8 + col;
+  if (!state.cells[next]) {
+    moves.push({ to: next });
+    return;
+  }
+  if (state.cells[next].side === piece.side) return;
+  const landingRow = row + dr, landingCol = col + dc;
+  if (landingRow < 0 || landingRow > 7 || landingCol < 0 || landingCol > 7) return;
+  const landing = landingRow * 8 + landingCol;
+  if (!state.cells[landing]) moves.push({ to: landing, take: next });
+}
+
+function checkMoves(index) {
+  const piece = state.cells[index];
+  if (!piece) return [];
+  const options = checkerMovesFor(index);
+  const anyCapture = state.cells.some((candidate, candidateIndex) =>
+    candidate?.side === state.turn && checkerMovesFor(candidateIndex).some((move) => move.take !== undefined),
+  );
   return anyCapture ? options.filter((move) => move.take !== undefined) : options;
 }
 
-function checkMovesRaw(index) {
-  const p = state.cells[index];
-  if (!p) return [];
-  const row = Math.floor(index / 8), col = index % 8;
-  const directions = p.king ? [-1, 1] : [p.side === 'red' ? -1 : 1];
-  const result = [];
-  for (const dr of directions) for (const dc of [-1, 1]) {
-    const r = row + dr, c = col + dc;
-    if (r < 0 || r > 7 || c < 0 || c > 7) continue;
-    const to = r * 8 + c;
-    if (!state.cells[to]) result.push({ to });
-    else if (state.cells[to].side !== p.side) {
-      const rr = r + dr, cc = c + dc;
-      if (rr >= 0 && rr < 8 && cc >= 0 && cc < 8 && !state.cells[rr * 8 + cc]) {
-        result.push({ to: rr * 8 + cc, take: to });
-      }
-    }
-  }
-  return result;
-}
 
 function renderCheckers() {
   board.replaceChildren();
@@ -264,47 +259,51 @@ function renderCheckers() {
   });
 }
 
+function finishCheckerTurn(moving) {
+  state.turn = state.turn === 'red' ? 'black' : 'red';
+  const opponentCanMove = state.cells.some((piece, index) =>
+    piece?.side === state.turn && checkMoves(index).length > 0,
+  );
+  if (!opponentCanMove) {
+    state.done = true;
+    setStatus(`¡Ganan ${moving.side === 'red' ? 'rojas' : 'negras'}!`);
+  } else {
+    setStatus(`Turno de ${state.turn === 'red' ? 'rojas' : 'negras'}`);
+  }
+  state.selected = null;
+}
+
+function applyCheckerMove(index, move) {
+  const moving = state.cells[state.selected];
+  state.cells[index] = moving;
+  state.cells[state.selected] = null;
+  if (move.take !== undefined) state.cells[move.take] = null;
+  const reachesEnd = (moving.side === 'red' && index < 8) || (moving.side === 'black' && index >= 56);
+  if (reachesEnd) moving.king = true;
+  if (move.take !== undefined && checkMoves(index).some((option) => option.take !== undefined)) {
+    state.selected = index;
+    setStatus('¡Sigue capturando con esa ficha!');
+    return;
+  }
+  finishCheckerTurn(moving);
+}
+
 function clickCheckers(index) {
   if (state.done) return;
   const piece = state.cells[index];
   if (state.selected === null) {
-    if (piece?.side === state.turn && checkMoves(index).length) state.selected = index;
-    renderCheckers();
-    return;
+    state.selected = piece?.side === state.turn && checkMoves(index).length ? index : null;
+  } else {
+    const move = checkMoves(state.selected).find((option) => option.to === index);
+    if (move) applyCheckerMove(index, move);
+    else state.selected = piece?.side === state.turn ? index : null;
   }
-  const move = checkMoves(state.selected).find((option) => option.to === index);
-  if (move) {
-    const moving = state.cells[state.selected];
-    state.cells[index] = moving;
-    state.cells[state.selected] = null;
-    if (move.take !== undefined) state.cells[move.take] = null;
-    const reachesEnd =
-      (moving.side === 'red' && index < 8) ||
-      (moving.side === 'black' && index >= 56);
-    if (reachesEnd) moving.king = true;
-    if (move.take !== undefined && checkMoves(index).some((option) => option.take !== undefined)) {
-      state.selected = index;
-      renderCheckers();
-      setStatus('¡Sigue capturando con esa ficha!');
-      return;
-    }
-    state.turn = state.turn === 'red' ? 'black' : 'red';
-    const opponentCanMove = state.cells.some((piece, i) => {
-      return piece?.side === state.turn && checkMoves(i).length > 0;
-    });
-    if (!opponentCanMove) {
-      state.done = true;
-      setStatus(`¡Ganan ${moving.side === 'red' ? 'rojas' : 'negras'}!`);
-    } else setStatus(`Turno de ${state.turn === 'red' ? 'rojas' : 'negras'}`);
-    state.selected = null;
-  } else if (piece?.side === state.turn) state.selected = index;
-  else state.selected = null;
   renderCheckers();
 }
 
 function startChess() {
   const row = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'];
-  state = { cells: Array(64).fill(''), turn: 'white', selected: null, done: false };
+  state = { cells: new Array(64).fill(''), turn: 'white', selected: null, done: false };
   row.forEach((piece, column) => {
     state.cells[column] = piece;
     state.cells[8 + column] = 'p';
@@ -315,43 +314,73 @@ function startChess() {
   setStatus('Turno de blancas');
 }
 
+function chessSide(piece) {
+  return piece === piece.toUpperCase() ? 'white' : 'black';
+}
+
+function addChessDestination(moves, row, col, side) {
+  if (row < 0 || row > 7 || col < 0 || col > 7) return false;
+  const destination = row * 8 + col;
+  const target = state.cells[destination];
+  if (target && chessSide(target) === side) return false;
+  moves.push(destination);
+  return !target;
+}
+
+function addPawnMoves(moves, row, col, side) {
+  const direction = side === 'white' ? -1 : 1;
+  const startingRow = side === 'white' ? 6 : 1;
+  const nextRow = row + direction;
+  if (nextRow < 0 || nextRow > 7) return;
+  if (!state.cells[nextRow * 8 + col]) {
+    moves.push(nextRow * 8 + col);
+    const doubleStep = (row + direction * 2) * 8 + col;
+    if (row === startingRow && !state.cells[doubleStep]) moves.push(doubleStep);
+  }
+  for (const offset of [-1, 1]) {
+    const targetCol = col + offset;
+    if (targetCol < 0 || targetCol > 7) continue;
+    const target = state.cells[nextRow * 8 + targetCol];
+    if (target && chessSide(target) !== side) moves.push(nextRow * 8 + targetCol);
+  }
+}
+
+function chessDirections(type) {
+  const diagonal = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+  const straight = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  if (type === 'b') return diagonal;
+  if (type === 'r') return straight;
+  if (type === 'q' || type === 'k') return [...diagonal, ...straight];
+  return [];
+}
+
+function addLeaperMoves(moves, row, col, side) {
+  const offsets = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+  offsets.forEach(([dr, dc]) => addChessDestination(moves, row + dr, col + dc, side));
+}
+
+function addSlidingMoves(moves, row, col, side, type) {
+  for (const [dr, dc] of chessDirections(type)) {
+    let targetRow = row + dr;
+    let targetCol = col + dc;
+    const maxSteps = type === 'k' ? 1 : 7;
+    for (let step = 0; step < maxSteps; step++) {
+      if (!addChessDestination(moves, targetRow, targetCol, side)) break;
+      targetRow += dr;
+      targetCol += dc;
+    }
+  }
+}
+
 function chessMoves(from) {
   const piece = state.cells[from];
   if (!piece) return [];
-  const side = piece === piece.toUpperCase() ? 'white' : 'black';
-  const r = Math.floor(from / 8), c = from % 8, type = piece.toLowerCase();
+  const side = chessSide(piece);
+  const row = Math.floor(from / 8), col = from % 8, type = piece.toLowerCase();
   const moves = [];
-  const add = (rr, cc) => {
-    if (rr < 0 || rr > 7 || cc < 0 || cc > 7) return false;
-    const to = rr * 8 + cc, target = state.cells[to];
-    if (target && (target === target.toUpperCase() ? 'white' : 'black') === side) return false;
-    moves.push(to);
-    return !target;
-  };
-  if (type === 'p') {
-    const dir = side === 'white' ? -1 : 1, start = side === 'white' ? 6 : 1;
-    if (r + dir >= 0 && r + dir < 8 && !state.cells[(r + dir) * 8 + c]) {
-      moves.push((r + dir) * 8 + c);
-      if (r === start && !state.cells[(r + 2 * dir) * 8 + c]) moves.push((r + 2 * dir) * 8 + c);
-    }
-    for (const dc of [-1, 1]) if (c + dc >= 0 && c + dc < 8) {
-      const to = (r + dir) * 8 + c + dc, target = state.cells[to];
-      if (target && (target === target.toUpperCase() ? 'white' : 'black') !== side) moves.push(to);
-    }
-  } else if (type === 'n') {
-    [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr,dc]) => add(r+dr,c+dc));
-  } else {
-    const dirs = [];
-    if (type === 'b' || type === 'q' || type === 'k') dirs.push([-1,-1],[-1,1],[1,-1],[1,1]);
-    if (type === 'r' || type === 'q' || type === 'k') dirs.push([-1,0],[1,0],[0,-1],[0,1]);
-    dirs.forEach(([dr,dc]) => {
-      let rr = r + dr, cc = c + dc, steps = 0;
-      while (rr >= 0 && rr < 8 && cc >= 0 && cc < 8 && (type !== 'k' || steps < 1)) {
-        if (!add(rr,cc)) break;
-        rr += dr; cc += dc; steps++;
-      }
-    });
-  }
+  if (type === 'p') addPawnMoves(moves, row, col, side);
+  else if (type === 'n') addLeaperMoves(moves, row, col, side);
+  else addSlidingMoves(moves, row, col, side, type);
   return moves;
 }
 
@@ -374,32 +403,40 @@ function renderChess() {
   });
 }
 
+function selectChessPiece(index) {
+  const piece = state.cells[index];
+  state.selected = piece && chessSide(piece) === state.turn ? index : null;
+}
+
+function finishChessTurn(moving, capturedKing) {
+  state.turn = state.turn === 'white' ? 'black' : 'white';
+  state.selected = null;
+  if (capturedKing) {
+    state.done = true;
+    setStatus(`¡Ganan ${chessSide(moving) === 'white' ? 'blancas' : 'negras'}!`);
+  } else {
+    setStatus(`Turno de ${state.turn === 'white' ? 'blancas' : 'negras'}`);
+  }
+}
+
+function applyChessMove(index) {
+  const moving = state.cells[state.selected];
+  const capturedKing = state.cells[index]?.toLowerCase() === 'k';
+  state.cells[index] = moving;
+  state.cells[state.selected] = '';
+  const promotes = moving.toLowerCase() === 'p' && (index < 8 || index >= 56);
+  if (promotes) state.cells[index] = chessSide(moving) === 'white' ? 'Q' : 'q';
+  finishChessTurn(moving, capturedKing);
+}
+
 function clickChess(index) {
   if (state.done) return;
-  const piece = state.cells[index];
   if (state.selected === null) {
-    const side = piece === piece?.toUpperCase() ? 'white' : 'black';
-    if (piece && side === state.turn) state.selected = index;
-    renderChess();
-    return;
-  }
-  const moves = chessMoves(state.selected);
-  if (moves.includes(index)) {
-    const moving = state.cells[state.selected];
-    state.cells[index] = moving;
-    state.cells[state.selected] = '';
-    const promotes = moving.toLowerCase() === 'p' && (index < 8 || index >= 56);
-    if (promotes) state.cells[index] = moving === 'P' ? 'Q' : 'q';
-    const capturedKing = piece?.toLowerCase() === 'k';
-    state.turn = state.turn === 'white' ? 'black' : 'white';
-    state.selected = null;
-    if (capturedKing) {
-      state.done = true;
-      setStatus(`¡Ganan ${moving === moving.toUpperCase() ? 'blancas' : 'negras'}!`);
-    } else setStatus(`Turno de ${state.turn === 'white' ? 'blancas' : 'negras'}`);
+    selectChessPiece(index);
+  } else if (chessMoves(state.selected).includes(index)) {
+    applyChessMove(index);
   } else {
-    const side = piece === piece?.toUpperCase() ? 'white' : 'black';
-    state.selected = piece && side === state.turn ? index : null;
+    selectChessPiece(index);
   }
   renderChess();
 }
@@ -444,7 +481,10 @@ function renderSolitaire() {
     pile.setAttribute('aria-label', name);
     if (!cards.length) {
       const title = document.createElement('span'); title.className = 'pile-title';
-      title.textContent = type === 'stock' ? '↻' : type === 'foundation' ? 'A' : '·';
+      let placeholder = '·';
+      if (type === 'stock') placeholder = '↻';
+      if (type === 'foundation') placeholder = 'A';
+      title.textContent = placeholder;
       pile.append(title);
     }
     if (type === 'tableau') {
@@ -549,8 +589,7 @@ function moveToColumn(index) {
   const first = cards[0];
   const canPlaceOnEmpty = !target && first.rank === 'K';
   const canPlaceOnCard =
-    target &&
-    target.faceUp &&
+    target?.faceUp &&
     target.red !== first.red &&
     target.value === first.value + 1;
   if (canPlaceOnEmpty || canPlaceOnCard) {
