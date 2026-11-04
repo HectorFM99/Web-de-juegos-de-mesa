@@ -7,8 +7,8 @@
   --green-soft: #748365;
   --rust: #b56445;
   --line: #d8d0bf;
-  --serif: 'Playfair Display', Georgia, serif;
-  --sans: 'DM Sans', Arial, sans-serif;
+  --serif: "Playfair Display", Georgia, serif;
+  --sans: "DM Sans", Arial, sans-serif;
 }
 * {
   box-sizing: border-box;
@@ -133,7 +133,8 @@ h1 {
   border: 7px solid #675943;
   box-shadow: 0 5px 0 #55452f;
 }
-.chess-board, .checkers-board {
+.chess-board,
+.checkers-board {
   width: min(72vw, 480px);
   aspect-ratio: 1;
   grid-template: repeat(8, 1fr) / repeat(8, 1fr);
@@ -183,7 +184,7 @@ h1 {
   border-color: #d6c59e;
 }
 .checker-piece.king::after {
-  content: '✦';
+  content: "✦";
   display: grid;
   height: 100%;
   place-items: center;
@@ -241,7 +242,7 @@ h1 {
   gap: 10px;
 }
 .memory-card {
-  aspect-ratio: .82;
+  aspect-ratio: 0.82;
   border: 2px solid #e5d7bb;
   border-radius: 5px;
   background: var(--green-soft);
@@ -250,7 +251,8 @@ h1 {
   cursor: pointer;
   box-shadow: 2px 4px 0 #65553b44;
 }
-.memory-card.revealed, .memory-card.matched {
+.memory-card.revealed,
+.memory-card.matched {
   background: #f5eddd;
   color: var(--rust);
 }
@@ -311,7 +313,9 @@ h1 {
   font: 16px var(--serif);
   pointer-events: none;
 }
-.solitaire-pile.stock, .solitaire-pile.waste, .solitaire-pile.foundation {
+.solitaire-pile.stock,
+.solitaire-pile.waste,
+.solitaire-pile.foundation {
   min-height: 112px;
 }
 .solitaire-pile.stock .playing-card,
@@ -369,12 +373,12 @@ h1 {
     padding: 5px 3px;
     font-size: 10px;
   }
-
 }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     scroll-behavior: auto !important;
     transition: none !important;
   }
-
 }
