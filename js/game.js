@@ -62,7 +62,7 @@ function winnerLine(cells, size, length, row, column, player, directions) {
 }
 
 function startTicTacToe() {
-  state = { cells: Array(9).fill(''), turn: 'X', done: false };
+  state = { cells: new Array(9).fill(''), turn: 'X', done: false };
   board.replaceChildren();
   state.cells.forEach((_, index) => {
     const cell = document.createElement('button');
