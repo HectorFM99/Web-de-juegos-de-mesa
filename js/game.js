@@ -159,57 +159,71 @@ function startMemory() {
     const card = document.createElement("button");
     card.className = "memory-card";
     card.setAttribute("aria-label", `Carta ${index + 1}, oculta`);
-    card.addEventListener("click", () => {
-      if (
-        state.locked ||
-        state.matched.has(index) ||
-        state.open.includes(index)
-      )
-        return;
-      card.textContent = symbol;
-      card.classList.add("revealed");
-      card.setAttribute("aria-label", `Carta ${index + 1}: ${symbol}`);
-      state.open.push(index);
-      if (state.open.length < 2) return;
-      state.moves++;
-      const [first, second] = state.open;
-      if (deck[first] === deck[second]) {
-        state.matched.add(first);
-        state.matched.add(second);
-        board.children[first].classList.add("matched");
-        board.children[second].classList.add("matched");
-        state.open = [];
-        if (state.matched.size === deck.length) {
-          setStatus(
-            `¡Todas las parejas! Lo lograste en ${state.moves} intentos.`,
-          );
-        } else {
-          setStatus(
-            `Parejas encontradas: ${state.matched.size / 2} de 8 · ` +
-              `Intentos: ${state.moves}`,
-          );
-        }
-      } else {
-        state.locked = true;
-        setStatus(
-          `Parejas encontradas: ${state.matched.size / 2} de 8 · ` +
-            `Intentos: ${state.moves}`,
-        );
-        window.setTimeout(() => {
-          [first, second].forEach((i) => {
-            const hidden = board.children[i];
-            hidden.textContent = "";
-            hidden.classList.remove("revealed");
-            hidden.setAttribute("aria-label", `Carta ${i + 1}, oculta`);
-          });
-          state.open = [];
-          state.locked = false;
-        }, 750);
-      }
-    });
+    card.addEventListener("click", () => handleMemoryClick(card, symbol, index, deck));
     board.append(card);
   });
   setStatus("Parejas encontradas: 0 de 8");
+}
+
+function handleMemoryClick(card, symbol, index, deck) {
+  if (
+    state.locked ||
+    state.matched.has(index) ||
+    state.open.includes(index)
+  )
+    return;
+  card.textContent = symbol;
+  card.classList.add("revealed");
+  card.setAttribute("aria-label", `Carta ${index + 1}: ${symbol}`);
+  state.open.push(index);
+  if (state.open.length < 2) return;
+  processMemoryPair(deck);
+}
+
+function processMemoryPair(deck) {
+  state.moves++;
+  const [first, second] = state.open;
+  if (deck[first] === deck[second]) {
+    handleMemoryMatch(first, second, deck.length);
+  } else {
+    handleMemoryMismatch(first, second);
+  }
+}
+
+function handleMemoryMatch(first, second, totalLength) {
+  state.matched.add(first);
+  state.matched.add(second);
+  board.children[first].classList.add("matched");
+  board.children[second].classList.add("matched");
+  state.open = [];
+  if (state.matched.size === totalLength) {
+    setStatus(
+      `¡Todas las parejas! Lo lograste en ${state.moves} intentos.`,
+    );
+  } else {
+    setStatus(
+      `Parejas encontradas: ${state.matched.size / 2} de 8 · ` +
+        `Intentos: ${state.moves}`,
+    );
+  }
+}
+
+function handleMemoryMismatch(first, second) {
+  state.locked = true;
+  setStatus(
+    `Parejas encontradas: ${state.matched.size / 2} de 8 · ` +
+      `Intentos: ${state.moves}`,
+  );
+  window.setTimeout(() => {
+    [first, second].forEach((i) => {
+      const hidden = board.children[i];
+      hidden.textContent = "";
+      hidden.classList.remove("revealed");
+      hidden.setAttribute("aria-label", `Carta ${i + 1}, oculta`);
+    });
+    state.open = [];
+    state.locked = false;
+  }, 750);
 }
 
 function startCheckers() {
@@ -219,22 +233,20 @@ function startCheckers() {
     selected: null,
     done: false,
   };
-  for (let row = 0; row < 3; row++) {
-    for (let column = 0; column < 8; column++) {
-      if ((row + column) % 2) {
-        state.cells[boardIndex(row, column)] = { side: "black", king: false };
-      }
-    }
-  }
-  for (let row = 5; row < 8; row++) {
-    for (let column = 0; column < 8; column++) {
-      if ((row + column) % 2) {
-        state.cells[boardIndex(row, column)] = { side: "red", king: false };
-      }
-    }
-  }
+  populateCheckersRows(0, 3, "black");
+  populateCheckersRows(5, 8, "red");
   renderCheckers();
   setStatus("Turno de rojas");
+}
+
+function populateCheckersRows(startRow, endRow, side) {
+  for (let row = startRow; row < endRow; row++) {
+    for (let column = 0; column < BOARD_SIZE; column++) {
+      if ((row + column) % 2) {
+        state.cells[boardIndex(row, column)] = { side, king: false };
+      }
+    }
+  }
 }
 
 function checkerDirections(piece) {
@@ -245,8 +257,8 @@ function checkerDirections(piece) {
 function checkerMovesFor(index) {
   const piece = state.cells[index];
   if (!piece) return [];
-  const row = Math.floor(index / BOARD_SIZE),
-    col = index % BOARD_SIZE;
+  const row = Math.floor(index / BOARD_SIZE);
+  const col = index % BOARD_SIZE;
   const moves = [];
   for (const dr of checkerDirections(piece)) {
     for (const dc of [-1, 1]) {
@@ -267,16 +279,19 @@ function boardIndex(row, column) {
 function addCheckerMove(moves, piece, row, col, dr, dc) {
   if (!isOnBoard(row, col)) return;
   const next = boardIndex(row, col);
-  if (!state.cells[next]) {
+  const target = state.cells[next];
+  if (!target) {
     moves.push({ to: next });
     return;
   }
-  if (state.cells[next].side === piece.side) return;
-  const landingRow = row + dr,
-    landingCol = col + dc;
+  if (target.side === piece.side) return;
+  const landingRow = row + dr;
+  const landingCol = col + dc;
   if (!isOnBoard(landingRow, landingCol)) return;
   const landing = boardIndex(landingRow, landingCol);
-  if (!state.cells[landing]) moves.push({ to: landing, take: next });
+  if (!state.cells[landing]) {
+    moves.push({ to: landing, take: next });
+  }
 }
 
 function checkMoves(index) {
@@ -288,17 +303,16 @@ function checkMoves(index) {
       candidate?.side === state.turn &&
       checkerMovesFor(candidateIndex).some((move) => move.take !== undefined),
   );
-  return anyCapture
-    ? options.filter((move) => move.take !== undefined)
-    : options;
+  if (!anyCapture) return options;
+  return options.filter((move) => move.take !== undefined);
 }
 
 function renderCheckers() {
   board.replaceChildren();
   state.cells.forEach((piece, index) => {
     const cell = document.createElement("button");
-    const r = Math.floor(index / 8),
-      c = index % 8;
+    const r = Math.floor(index / BOARD_SIZE);
+    const c = index % BOARD_SIZE;
     const color = (r + c) % 2 ? "dark" : "light";
     const selected = state.selected === index ? " selected" : "";
     cell.className = `square ${color}${selected}`;
@@ -335,8 +349,8 @@ function applyCheckerMove(index, move) {
   state.cells[state.selected] = null;
   if (move.take !== undefined) state.cells[move.take] = null;
   const reachesEnd =
-    (moving.side === "red" && index < 8) ||
-    (moving.side === "black" && index >= 56);
+    (moving.side === "red" && index < BOARD_SIZE) ||
+    (moving.side === "black" && index >= BOARD_SIZE * (BOARD_SIZE - 1));
   if (reachesEnd) moving.king = true;
   if (
     move.take !== undefined &&
@@ -359,8 +373,11 @@ function clickCheckers(index) {
     const move = checkMoves(state.selected).find(
       (option) => option.to === index,
     );
-    if (move) applyCheckerMove(index, move);
-    else state.selected = piece?.side === state.turn ? index : null;
+    if (move) {
+      applyCheckerMove(index, move);
+    } else {
+      state.selected = piece?.side === state.turn ? index : null;
+    }
   }
   renderCheckers();
 }
@@ -375,9 +392,9 @@ function startChess() {
   };
   row.forEach((piece, column) => {
     state.cells[column] = piece;
-    state.cells[8 + column] = "p";
-    state.cells[48 + column] = "P";
-    state.cells[56 + column] = piece.toUpperCase();
+    state.cells[BOARD_SIZE + column] = "p";
+    state.cells[BOARD_SIZE * 6 + column] = "P";
+    state.cells[BOARD_SIZE * 7 + column] = piece.toUpperCase();
   });
   renderChess();
   setStatus("Turno de blancas");
@@ -388,31 +405,46 @@ function chessSide(piece) {
 }
 
 function addChessDestination(moves, row, col, side) {
-  if (row < 0 || row > 7 || col < 0 || col > 7) return false;
-  const destination = row * 8 + col;
+  if (!isOnBoard(row, col)) return false;
+  const destination = boardIndex(row, col);
   const target = state.cells[destination];
   if (target && chessSide(target) === side) return false;
   moves.push(destination);
   return !target;
 }
 
-function addPawnMoves(moves, row, col, side) {
+function addPawnSingleStep(moves, row, col, side) {
   const direction = side === "white" ? -1 : 1;
-  const startingRow = side === "white" ? 6 : 1;
   const nextRow = row + direction;
-  if (nextRow < 0 || nextRow > 7) return;
-  if (!state.cells[nextRow * 8 + col]) {
-    moves.push(nextRow * 8 + col);
-    const doubleStep = (row + direction * 2) * 8 + col;
-    if (row === startingRow && !state.cells[doubleStep]) moves.push(doubleStep);
+  if (!isOnBoard(nextRow, col)) return;
+  const nextIdx = boardIndex(nextRow, col);
+  if (state.cells[nextIdx]) return;
+  moves.push(nextIdx);
+  const startingRow = side === "white" ? 6 : 1;
+  const doubleRow = row + direction * 2;
+  const doubleIdx = boardIndex(doubleRow, col);
+  if (row === startingRow && !state.cells[doubleIdx]) {
+    moves.push(doubleIdx);
   }
+}
+
+function addPawnCaptures(moves, row, col, side) {
+  const direction = side === "white" ? -1 : 1;
+  const nextRow = row + direction;
   for (const offset of [-1, 1]) {
     const targetCol = col + offset;
-    if (targetCol < 0 || targetCol > 7) continue;
-    const target = state.cells[nextRow * 8 + targetCol];
-    if (target && chessSide(target) !== side)
-      moves.push(nextRow * 8 + targetCol);
+    if (!isOnBoard(nextRow, targetCol)) continue;
+    const targetIdx = boardIndex(nextRow, targetCol);
+    const target = state.cells[targetIdx];
+    if (target && chessSide(target) !== side) {
+      moves.push(targetIdx);
+    }
   }
+}
+
+function addPawnMoves(moves, row, col, side) {
+  addPawnSingleStep(moves, row, col, side);
+  addPawnCaptures(moves, row, col, side);
 }
 
 function chessDirections(type) {
@@ -454,7 +486,7 @@ function addSlidingMoves(moves, row, col, side, type) {
   for (const [dr, dc] of chessDirections(type)) {
     let targetRow = row + dr;
     let targetCol = col + dc;
-    const maxSteps = type === "k" ? 1 : 7;
+    const maxSteps = type === "k" ? 1 : BOARD_SIZE - 1;
     for (let step = 0; step < maxSteps; step++) {
       if (!addChessDestination(moves, targetRow, targetCol, side)) break;
       targetRow += dr;
@@ -467,9 +499,9 @@ function chessMoves(from) {
   const piece = state.cells[from];
   if (!piece) return [];
   const side = chessSide(piece);
-  const row = Math.floor(from / 8),
-    col = from % 8,
-    type = piece.toLowerCase();
+  const row = Math.floor(from / BOARD_SIZE);
+  const col = from % BOARD_SIZE;
+  const type = piece.toLowerCase();
   const moves = [];
   if (type === "p") addPawnMoves(moves, row, col, side);
   else if (type === "n") addLeaperMoves(moves, row, col, side);
@@ -480,8 +512,8 @@ function chessMoves(from) {
 function renderChess() {
   board.replaceChildren();
   state.cells.forEach((piece, index) => {
-    const r = Math.floor(index / 8),
-      c = index % 8;
+    const r = Math.floor(index / BOARD_SIZE);
+    const c = index % BOARD_SIZE;
     const cell = document.createElement("button");
     const color = (r + c) % 2 ? "dark" : "light";
     const selected = state.selected === index ? " selected" : "";
@@ -520,7 +552,7 @@ function applyChessMove(index) {
   const capturedKing = state.cells[index]?.toLowerCase() === "k";
   state.cells[index] = moving;
   state.cells[state.selected] = "";
-  const promotes = moving.toLowerCase() === "p" && (index < 8 || index >= 56);
+  const promotes = moving.toLowerCase() === "p" && (index < BOARD_SIZE || index >= BOARD_SIZE * (BOARD_SIZE - 1));
   if (promotes) state.cells[index] = chessSide(moving) === "white" ? "Q" : "q";
   finishChessTurn(moving, capturedKing);
 }
@@ -714,7 +746,7 @@ function moveToColumn(index) {
   const first = cards[0];
   const canPlaceOnEmpty = !target && first.rank === "K";
   const canPlaceOnCard =
-    target?.faceUp &&
+    Boolean(target?.faceUp) &&
     target.red !== first.red &&
     target.value === first.value + 1;
   if (canPlaceOnEmpty || canPlaceOnCard) {
@@ -732,7 +764,7 @@ function moveToFoundation(index) {
   const top = foundation.at(-1);
   const canStartFoundation = !top && card.rank === "A";
   const canAddToFoundation =
-    top && top.suit === card.suit && card.value === top.value + 1;
+    Boolean(top) && top.suit === card.suit && card.value === top.value + 1;
   if (canStartFoundation || canAddToFoundation) {
     const moved = removeSelected();
     foundation.push(Array.isArray(moved) ? moved[0] : moved);
