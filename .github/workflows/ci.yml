@@ -24,15 +24,6 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Preparar Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-
-      - name: Instalar dependencias
-        run: npm ci
-
       - name: Lint
         run: npm run lint
 
@@ -46,3 +37,6 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v8
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.qualitygate.wait=true

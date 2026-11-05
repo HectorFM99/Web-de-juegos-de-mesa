@@ -770,3 +770,39 @@ function moveToFoundation(index) {
 }
 
 reset();
+
+/* global module */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    winnerLine,
+    startTicTacToe,
+    startConnectFour,
+    startMemory,
+    startCheckers,
+    checkerDirections,
+    checkerMovesFor,
+    isOnBoard,
+    boardIndex,
+    addCheckerMove,
+    checkMoves,
+    finishCheckerTurn,
+    applyCheckerMove,
+    startChess,
+    chessSide,
+    addChessDestination,
+    addPawnMoves,
+    chessDirections,
+    addLeaperMoves,
+    addSlidingMoves,
+    chessMoves,
+    selectChessPiece,
+    finishChessTurn,
+    applyChessMove,
+    startSolitaire,
+    selectedCards,
+    removeSelected,
+    moveToColumn,
+    moveToFoundation,
+    reset,
+  };
+}

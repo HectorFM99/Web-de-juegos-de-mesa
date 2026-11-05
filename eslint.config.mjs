@@ -16,7 +16,7 @@ export default [
 
   // Los tests se ejecutan con Node.js
   {
-    files: ["tests/**/*.js"],
+    files: ["tests/**/*.js", "test/**/*.js"],
     languageOptions: {
       sourceType: "commonjs",
       globals: globals.node,
