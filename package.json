@@ -12,7 +12,7 @@
   },
   "scripts": {
     "lint": "npm run lint:html && npm run lint:js",
-    "lint:html": "npx --yes htmlhint \"**/*.html\"",
+    "lint:html": "npx --yes htmlhint \"**/*.html\" --ignore \"coverage/**\"",
     "lint:js": "eslint .",
     "test": "c8 -r lcov node --test"
   }
