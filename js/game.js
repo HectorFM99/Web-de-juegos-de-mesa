@@ -86,8 +86,13 @@ function startTicTacToe() {
       const row = Math.floor(index / 3);
       const column = index % 3;
       const directions = LINE_DIRECTIONS;
+      const grid = [
+        state.cells.slice(0, 3),
+        state.cells.slice(3, 6),
+        state.cells.slice(6, 9),
+      ];
       if (
-        winnerLine([state.cells], 3, 3, row, column, state.turn, directions)
+        winnerLine(grid, 3, 3, row, column, state.turn, directions)
       ) {
         state.done = true;
         setStatus(`¡${state.turn} gana la partida!`);
@@ -787,6 +792,7 @@ if (typeof module !== "undefined" && module.exports) {
     checkMoves,
     finishCheckerTurn,
     applyCheckerMove,
+    clickCheckers,
     startChess,
     chessSide,
     addChessDestination,
@@ -798,7 +804,11 @@ if (typeof module !== "undefined" && module.exports) {
     selectChessPiece,
     finishChessTurn,
     applyChessMove,
+    clickChess,
     startSolitaire,
+    renderSolitaire,
+    clickPile,
+    clickCard,
     selectedCards,
     removeSelected,
     moveToColumn,
