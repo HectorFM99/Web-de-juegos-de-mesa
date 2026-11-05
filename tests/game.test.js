@@ -69,3 +69,18 @@ test("game starters run without error", () => {
   assert.doesNotThrow(() => gameModule.startSolitaire());
   assert.doesNotThrow(() => gameModule.reset());
 });
+
+test("checkers and chess extra functions", () => {
+  gameModule.startCheckers();
+  assert.doesNotThrow(() => gameModule.checkerMovesFor(0));
+  assert.doesNotThrow(() => gameModule.checkMoves(0));
+
+  gameModule.startChess();
+  assert.doesNotThrow(() => gameModule.chessMoves(0, 0));
+  assert.doesNotThrow(() => gameModule.selectChessPiece(0));
+
+  gameModule.startSolitaire();
+  assert.deepStrictEqual(gameModule.selectedCards(), []);
+  assert.doesNotThrow(() => gameModule.moveToColumn(0));
+  assert.doesNotThrow(() => gameModule.moveToFoundation(0));
+});
