@@ -25,22 +25,18 @@ function switchTab(tab) {
   }
 }
 
-async function handleLogin(e) {
-  e.preventDefault();
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-
+async function authenticateUser(endpoint, payload, fallbackUser) {
   try {
-    const res = await fetch('http://localhost:3000/auth/login', {
+    const res = await fetch(`http://localhost:3000/auth/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify(payload)
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      alert(Array.isArray(data.message) ? data.message.join(', ') : (data.message || 'Error al iniciar sesión.'));
+      alert(Array.isArray(data.message) ? data.message.join(', ') : (data.message || 'Error en la autenticación.'));
       return;
     }
 
@@ -52,9 +48,16 @@ async function handleLogin(e) {
   } catch (error) {
     // Ignored intentionally as offline/static preview fallback when NestJS backend is unreachable
     console.warn('Backend unavailable, using static session fallback:', error);
-    localStorage.setItem('sobremesa_user', JSON.stringify({ email }));
+    localStorage.setItem('sobremesa_user', JSON.stringify(fallbackUser));
     window.location.href = '../index.html';
   }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  await authenticateUser('login', { email, password }, { email });
 }
 
 async function handleRegister(e) {
@@ -62,32 +65,7 @@ async function handleRegister(e) {
   const username = document.getElementById('reg-username').value;
   const email = document.getElementById('reg-email').value;
   const password = document.getElementById('reg-password').value;
-
-  try {
-    const res = await fetch('http://localhost:3000/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(Array.isArray(data.message) ? data.message.join(', ') : (data.message || 'Error al registrarse.'));
-      return;
-    }
-
-    localStorage.setItem('sobremesa_user', JSON.stringify(data.user));
-    if (data.access_token) {
-      localStorage.setItem('sobremesa_token', data.access_token);
-    }
-    window.location.href = '../index.html';
-  } catch (error) {
-    // Ignored intentionally as offline/static preview fallback when NestJS backend is unreachable
-    console.warn('Backend unavailable, using static session fallback:', error);
-    localStorage.setItem('sobremesa_user', JSON.stringify({ username, email }));
-    window.location.href = '../index.html';
-  }
+  await authenticateUser('register', { username, email, password }, { username, email });
 }
 
 window.switchTab = switchTab;
