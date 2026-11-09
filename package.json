@@ -15,5 +15,8 @@
     "lint:html": "npx --yes htmlhint \"**/*.html\" --ignore \"coverage/**\"",
     "lint:js": "eslint .",
     "test": "c8 -r lcov node --test"
+  },
+  "dependencies": {
+    "argon2": "^0.45.2"
   }
 }

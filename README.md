@@ -31,12 +31,16 @@
 └── sonar-project.properties   # Configuración de análisis estático SonarCloud
 ```
 
-## 🐳 Uso de Docker en el Proyecto
+## 🐳 Uso de Docker y Arquitectura en el Proyecto
 
-En este proyecto, **Docker** se ha utilizado para empaquetar la aplicación web estática en un contenedor ligero basado en **Nginx (`nginx:alpine`)**. 
-- Permite servir el contenido de forma idéntica en cualquier entorno de producción.
-- Incorpora políticas de seguridad estrictas, como asegurar que los archivos estáticos tengan permisos de solo lectura propiedad de `root` dentro del contenedor.
-- Se complementa con **Docker Compose (`compose.yaml`)** para definir límites de recursos (CPU y memoria) y políticas de reinicio automático, garantizando estabilidad y aislamiento.
+En este proyecto, **Docker Compose** orquesta tres servicios principales:
+1. **Frontend (`frontend`):** Aplicación web estática servida mediante un contenedor ligero basado en **Nginx (`nginx:alpine`)**.
+2. **Backend (`backend`):** API robusta construida con **NestJS** y **TypeScript**, comunicándose mediante **Prisma ORM**.
+3. **Base de Datos (`postgres`):** Base de datos relacional **PostgreSQL 16** optimizada y persistente.
+
+- Permite servir el contenido y levantar la API de forma idéntica en cualquier entorno de producción.
+- Incorpora políticas de seguridad estrictas, como asegurar que los archivos estáticos tengan permisos de solo lectura y contenedores aislados.
+- Se define en `compose.yaml` con límites de recursos (CPU y memoria) y políticas de reinicio automático, garantizando estabilidad y rendimiento.
 
 ## 🔍 Análisis de Calidad con SonarQube / SonarCloud
 
