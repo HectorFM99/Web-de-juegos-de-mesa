@@ -59,8 +59,17 @@ a {
   color:#56574d;
   font-size:12px
 }
-.main-nav a:hover {
+.main-nav a:hover, .main-nav .nav-button:hover {
   color:var(--rust)
+}
+.main-nav .nav-button {
+  background: none;
+  border: none;
+  color: #56574d;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
 }
 .nav-cta {
   font-size:11px;
