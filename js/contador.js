@@ -16,8 +16,8 @@ function contar(nombre) {
 
   try {
     localStorage.setItem("visitas", visitas);
-  } catch (error) {
-    console.log(error);
+  } catch {
+    // Ignore localStorage write error in private browsing mode or when storage is disabled
   }
 }
 
