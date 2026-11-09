@@ -1,10 +1,11 @@
 services:
-  web:
-    build: .
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8079:80"
     restart: unless-stopped
-    # --- AVAILABILITY: Resource limits against DoS / resource exhaustion ---
     deploy:
       resources:
         limits:
@@ -13,6 +14,50 @@ services:
         reservations:
           cpus: '0.10'
           memory: 64M
-    # --- INTEGRITY: Prevent privilege escalation ---
     security_opt:
       - no-new-privileges:true
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres_dev_password@postgres:5432/lasobremesa?schema=public
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: la-sobremesa-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_dev_password
+      POSTGRES_DB: lasobremesa
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d lasobremesa"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
