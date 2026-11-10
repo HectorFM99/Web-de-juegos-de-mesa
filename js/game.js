@@ -363,6 +363,14 @@ function applyCheckerMove(index, move) {
   finishCheckerTurn(moving);
 }
 
+// A capture chain is in progress when the selected piece must keep capturing.
+function isCaptureChainInProgress() {
+  return (
+    state.selected !== null &&
+    checkMoves(state.selected).some((move) => move.take !== undefined)
+  );
+}
+
 function clickCheckers(index) {
   if (state.done) return;
   const piece = state.cells[index];
@@ -375,7 +383,7 @@ function clickCheckers(index) {
     );
     if (move) {
       applyCheckerMove(index, move);
-    } else {
+    } else if (!isCaptureChainInProgress()) {
       state.selected = piece?.side === state.turn ? index : null;
     }
   }
