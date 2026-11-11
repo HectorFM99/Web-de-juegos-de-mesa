@@ -35,12 +35,12 @@ export class AuthService {
       },
     });
 
-    const token = await this.signToken(user.id, user.email);
+    const token = await this.signToken(user.id, user.email, user.role);
 
     return {
       message: 'Usuario registrado con éxito',
       access_token: token,
-      user: { id: user.id, username: user.username, email: user.email },
+      user: { id: user.id, username: user.username, email: user.email, role: user.role },
     };
   }
 
@@ -59,19 +59,20 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas.');
     }
 
-    const token = await this.signToken(user.id, user.email);
+    const token = await this.signToken(user.id, user.email, user.role);
 
     return {
       message: 'Inicio de sesión exitoso',
       access_token: token,
-      user: { id: user.id, username: user.username, email: user.email },
+      user: { id: user.id, username: user.username, email: user.email, role: user.role },
     };
   }
 
-  async signToken(userId: number, email: string): Promise<string> {
+  async signToken(userId: number, email: string, role: string): Promise<string> {
     const payload = {
       sub: userId,
       email,
+      role,
     };
     return this.jwt.signAsync(payload, {
       expiresIn: '7d',
