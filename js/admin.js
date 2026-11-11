@@ -1,3 +1,4 @@
+/* global module */
 const API_BASE = 'http://localhost:3000';
 let allUsers = [];
 
@@ -239,3 +240,20 @@ window.toggleDebugLogs = toggleDebugLogs;
 window.toggleBan = toggleBan;
 window.toggleRole = toggleRole;
 window.logoutAdmin = logoutAdmin;
+
+// Exportable para tests (Node) sin afectar la carga como <script> en el navegador.
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    getToken,
+    getUser,
+    checkAdminAuth,
+    loadAdminData,
+    updateStats,
+    renderUsers,
+    toggleBan,
+    toggleRole,
+    loadDebugInfo,
+    escapeHtml,
+    logoutAdmin
+  };
+}
