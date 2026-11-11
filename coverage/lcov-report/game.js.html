@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">78.97% </span>
+                <span class="strong">79.46% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>646/818</span>
+                <span class='fraction'>650/818</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">74.16% </span>
+                <span class="strong">74.4% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>155/209</span>
+                <span class='fraction'>157/211</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">78.97% </span>
+                <span class="strong">79.46% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>646/818</span>
+                <span class='fraction'>650/818</span>
             </div>
         
             
@@ -1067,47 +1067,47 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
@@ -1884,48 +1884,48 @@ function handleMemoryClick(card, symbol, index, deck) {
 function processMemoryPair(deck) {
   state.moves++;
   const [first, second] = state.open;
-  if (deck[first] === deck[second]) {
-    handleMemoryMatch(first, second, deck.length);
-  }<span class="branch-0 cbranch-no" title="branch not covered" > else {</span>
-<span class="cstat-no" title="statement not covered" >    handleMemoryMismatch(first, second);</span>
-<span class="cstat-no" title="statement not covered" >  }</span>
-}
-&nbsp;
-function handleMemoryMatch(first, second, totalLength) {
-  state.matched.add(first);
-  state.matched.add(second);
-  board.children[first].classList.add("matched");
-  board.children[second].classList.add("matched");
-  state.open = [];
-  if (state.matched.size === totalLength) <span class="branch-0 cbranch-no" title="branch not covered" >{</span>
-<span class="cstat-no" title="statement not covered" >    setStatus(</span>
-<span class="cstat-no" title="statement not covered" >      `¡Todas las parejas! Lo lograste en ${state.moves} intentos.`,</span>
-<span class="cstat-no" title="statement not covered" >    );</span>
+  if (deck[first] === deck[second]) <span class="branch-0 cbranch-no" title="branch not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >    handleMemoryMatch(first, second, deck.length);</span>
   } else {
-    setStatus(
-      `Parejas encontradas: ${state.matched.size / 2} de 8 · ` +
-        `Intentos: ${state.moves}`,
-    );
+    handleMemoryMismatch(first, second);
   }
 }
 &nbsp;
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >function handleMemoryMismatch(first, second) {</span></span>
-<span class="cstat-no" title="statement not covered" >  state.locked = true;</span>
-<span class="cstat-no" title="statement not covered" >  setStatus(</span>
-<span class="cstat-no" title="statement not covered" >    `Parejas encontradas: ${state.matched.size / 2} de 8 · ` +</span>
-<span class="cstat-no" title="statement not covered" >      `Intentos: ${state.moves}`,</span>
-<span class="cstat-no" title="statement not covered" >  );</span>
-<span class="cstat-no" title="statement not covered" >  window.setTimeout(() =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    [first, second].forEach((i) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      const hidden = board.children[i];</span>
-<span class="cstat-no" title="statement not covered" >      hidden.textContent = "";</span>
-<span class="cstat-no" title="statement not covered" >      hidden.classList.remove("revealed");</span>
-<span class="cstat-no" title="statement not covered" >      hidden.setAttribute("aria-label", `Carta ${i + 1}, oculta`);</span>
-<span class="cstat-no" title="statement not covered" >    });</span>
-<span class="cstat-no" title="statement not covered" >    state.open = [];</span>
-<span class="cstat-no" title="statement not covered" >    state.locked = false;</span>
-<span class="cstat-no" title="statement not covered" >  }, 750);</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >function handleMemoryMatch(first, second, totalLength) {</span></span>
+<span class="cstat-no" title="statement not covered" >  state.matched.add(first);</span>
+<span class="cstat-no" title="statement not covered" >  state.matched.add(second);</span>
+<span class="cstat-no" title="statement not covered" >  board.children[first].classList.add("matched");</span>
+<span class="cstat-no" title="statement not covered" >  board.children[second].classList.add("matched");</span>
+<span class="cstat-no" title="statement not covered" >  state.open = [];</span>
+<span class="cstat-no" title="statement not covered" >  if (state.matched.size === totalLength) {</span>
+<span class="cstat-no" title="statement not covered" >    setStatus(</span>
+<span class="cstat-no" title="statement not covered" >      `¡Todas las parejas! Lo lograste en ${state.moves} intentos.`,</span>
+<span class="cstat-no" title="statement not covered" >    );</span>
+<span class="cstat-no" title="statement not covered" >  } else {</span>
+<span class="cstat-no" title="statement not covered" >    setStatus(</span>
+<span class="cstat-no" title="statement not covered" >      `Parejas encontradas: ${state.matched.size / 2} de 8 · ` +</span>
+<span class="cstat-no" title="statement not covered" >        `Intentos: ${state.moves}`,</span>
+<span class="cstat-no" title="statement not covered" >    );</span>
+<span class="cstat-no" title="statement not covered" >  }</span>
 <span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;
+function handleMemoryMismatch(first, second) {
+  state.locked = true;
+  setStatus(
+    `Parejas encontradas: ${state.matched.size / 2} de 8 · ` +
+      `Intentos: ${state.moves}`,
+  );
+  window.setTimeout(() =&gt; {
+    [first, second].forEach((i) =&gt; {
+      const hidden = board.children[i];
+      hidden.textContent = "";
+      hidden.classList.remove("revealed");
+      hidden.setAttribute("aria-label", `Carta ${i + 1}, oculta`);
+    });
+    state.open = [];
+    state.locked = false;
+  }, 750);
+}
 &nbsp;
 function startCheckers() {
   state = {
@@ -2448,7 +2448,7 @@ function moveToColumn(index) {
   const canPlaceOnEmpty = !target <span class="branch-0 cbranch-no" title="branch not covered" >&amp;&amp; first.rank === "K";</span>
   const canPlaceOnCard =
     Boolean(target?.faceUp) &amp;&amp;
-    target.red !== first.red &amp;&amp;
+    target.red !== first.red <span class="branch-0 cbranch-no" title="branch not covered" >&amp;&amp;</span>
     target.value === first.value + 1;
   if (canPlaceOnEmpty || canPlaceOnCard) <span class="branch-0 cbranch-no" title="branch not covered" >{</span>
 <span class="cstat-no" title="statement not covered" >    const moved = removeSelected();</span>
@@ -2524,7 +2524,7 @@ if (typeof module !== "undefined" &amp;&amp; module.exports) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-11-09T14:52:36.084Z
+                at 2026-11-11T15:56:30.836Z
             </div>
         <script src="prettify.js"></script>
         <script>

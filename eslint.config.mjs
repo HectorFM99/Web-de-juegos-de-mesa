@@ -2,6 +2,9 @@ import js from "@eslint/js";
 import globals from "globals";
 
 export default [
+  {
+    ignores: ["backend/dist/**", "backend/**", "node_modules/**", "coverage/**"],
+  },
   // Reglas recomendadas de ESLint: errores típicos
   js.configs.recommended,
 

@@ -9,16 +9,21 @@
   }
 
   function checkAdminDisplay() {
-    const userStr = localStorage.getItem('sobremesa_user');
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const userStrLocal = localStorage.getItem('sobremesa_user');
     let isAdmin = false;
     
-    if (userStr) {
+    if (userStrLocal) {
       try {
-        const user = JSON.parse(userStr);
+        const user = JSON.parse(userStrLocal);
         if (user.role === 'ADMIN' || user.email === 'admin@lasobremesa.local') {
           isAdmin = true;
         }
-      } catch (e) {}
+      } catch {
+        // Ignored
+      }
     }
 
     const token = localStorage.getItem('sobremesa_token');
@@ -28,10 +33,11 @@
         if (payload.role === 'ADMIN' || payload.email === 'admin@lasobremesa.local' || payload.sub === 1) {
           isAdmin = true;
         }
-      } catch (e) {}
+      } catch {
+        // Ignored
+      }
     }
 
-    // Force show if user is admin
     if (isAdmin) {
       const adminLink = document.getElementById('nav-admin');
       if (adminLink) {
@@ -40,10 +46,12 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkAdminDisplay);
-  } else {
-    checkAdminDisplay();
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', checkAdminDisplay);
+    } else {
+      checkAdminDisplay();
+    }
   }
 })();
 

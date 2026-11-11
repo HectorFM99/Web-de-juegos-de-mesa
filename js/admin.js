@@ -7,10 +7,12 @@ function getToken() {
 
 function getUser() {
   const userStr = localStorage.getItem('sobremesa_user');
-  if (!userStr) return null;
+  if (!userStr) {
+    return null;
+  }
   try {
     return JSON.parse(userStr);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -47,16 +49,16 @@ async function loadAdminData() {
     } else {
       alert(data.message || 'Error al cargar usuarios.');
     }
-  } catch (e) {
-    console.error('Error de conexión con el backend:', e);
+  } catch (err) {
+    console.error('Error de conexión con el backend:', err);
     alert('No se pudo conectar con el servidor backend en http://localhost:3000');
   }
 }
 
 function updateStats(users) {
   const total = users.length;
-  const admins = users.filter(u => u.role === 'ADMIN').length;
-  const banned = users.filter(u => u.banned).length;
+  const admins = users.filter((u) => u.role === 'ADMIN').length;
+  const banned = users.filter((u) => u.banned).length;
   
   document.getElementById('stat-users').textContent = total;
   document.getElementById('stat-admins').textContent = admins;
@@ -65,8 +67,8 @@ function updateStats(users) {
   fetch(`${API_BASE}/admin/debug`, {
     headers: { 'Authorization': `Bearer ${getToken()}` }
   })
-    .then(r => r.json())
-    .then(d => {
+    .then((r) => r.json())
+    .then((d) => {
       if (d && d.database) {
         document.getElementById('stat-matches').textContent = d.database.totalMatches || 0;
       }
@@ -79,7 +81,7 @@ function renderUsers(users) {
   const searchInput = document.getElementById('user-search');
   const search = searchInput ? searchInput.value.toLowerCase() : '';
 
-  const filtered = users.filter(u => 
+  const filtered = users.filter((u) => 
     u.username.toLowerCase().includes(search) || u.email.toLowerCase().includes(search)
   );
 
@@ -88,7 +90,7 @@ function renderUsers(users) {
     return;
   }
 
-  tbody.innerHTML = filtered.map(u => `
+  tbody.innerHTML = filtered.map((u) => `
     <tr>
       <td>#${u.id}</td>
       <td><strong>${escapeHtml(u.username)}</strong></td>
@@ -118,7 +120,9 @@ async function toggleBan(userId, isBanned) {
   let reason = '';
   if (!isBanned) {
     reason = prompt('Indica el motivo del baneo (mal comportamiento, etc.):', 'Mal comportamiento en las partidas');
-    if (reason === null) return;
+    if (reason === null) {
+      return;
+    }
   }
 
   const token = getToken();
@@ -139,15 +143,17 @@ async function toggleBan(userId, isBanned) {
     } else {
       alert(data.message || 'Error al actualizar el estado del usuario.');
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     alert('Error de conexión con el servidor.');
   }
 }
 
 async function toggleRole(userId, currentRole) {
   const newRole = currentRole === 'ADMIN' ? 'USER' : 'ADMIN';
-  if (!confirm(`¿Estás seguro de cambiar el rol a ${newRole}?`)) return;
+  if (!confirm(`¿Estás seguro de cambiar el rol a ${newRole}?`)) {
+    return;
+  }
 
   const token = getToken();
   try {
@@ -167,8 +173,8 @@ async function toggleRole(userId, currentRole) {
     } else {
       alert(data.message || 'Error al actualizar el rol.');
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     alert('Error de conexión con el servidor.');
   }
 }
@@ -187,8 +193,8 @@ async function loadDebugInfo() {
     } else {
       output.textContent = 'Error al obtener diagnóstico: ' + (data.message || res.statusText);
     }
-  } catch (e) {
-    output.textContent = 'Error de conexión con el servidor backend: ' + e.message;
+  } catch (err) {
+    output.textContent = 'Error de conexión con el servidor backend: ' + err.message;
   }
 }
 
@@ -205,7 +211,9 @@ function toggleDebugLogs() {
 }
 
 function escapeHtml(str) {
-  if (!str) return '';
+  if (!str) {
+    return '';
+  }
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
