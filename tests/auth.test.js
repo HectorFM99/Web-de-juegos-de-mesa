@@ -208,3 +208,21 @@ test("auth.js handleRegister catch fallback", async () => {
   assert.strictEqual(global.window.location.href, "../index.html");
   assert.ok(store.sobremesa_user);
 });
+
+test("auth.js redirects to index if already authenticated on load", () => {
+  global.localStorage = {
+    getItem: (k) => (k === "sobremesa_user" ? JSON.stringify({ id: 1 }) : null),
+    setItem: () => {}
+  };
+  global.window = {
+    location: { href: "" }
+  };
+  global.document = {
+    getElementById: () => null
+  };
+
+  delete require.cache[require.resolve("../js/auth.js")];
+  require("../js/auth.js");
+
+  assert.strictEqual(global.window.location.href, "../index.html");
+});
