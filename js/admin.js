@@ -225,7 +225,7 @@ function logoutAdmin() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  checkAdminAuth();
+  checkAdminAuth().catch((err) => console.error('Error al inicializar admin:', err));
   const searchEl = document.getElementById('user-search');
   if (searchEl) {
     searchEl.addEventListener('input', () => {
