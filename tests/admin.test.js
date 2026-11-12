@@ -184,7 +184,69 @@ test("admin checkAdminAuth no redirige y muestra info cuando es admin con token"
   assert.ok(elements["admin-user-info"].innerHTML.includes("ADMIN"));
 });
 
+test("admin checkAdminAuth redirige si solo el email es de admin pero el rol es USER", async () => {
+  installSeams({
+    user: JSON.stringify({ username: "admin", email: "admin@lasobremesa.local", role: "USER" }),
+    token: "tok-abc"
+  });
+  const { checkAdminAuth } = requireAdmin();
+  await checkAdminAuth();
+  assert.strictEqual(global.window.location.href, "auth.html");
+});
+
+test("admin checkAdminAuth acepta un token con rol ADMIN aunque el usuario guardado no lo tenga", async () => {
+  const payload = Buffer.from(JSON.stringify({ sub: 1, role: "ADMIN" })).toString("base64");
+  const { alerts } = installSeams({
+    user: JSON.stringify({ username: "admin", email: "admin@lasobremesa.local" }),
+    token: `h.${payload}.s`
+  });
+  const { checkAdminAuth } = requireAdmin();
+  await checkAdminAuth();
+  assert.strictEqual(global.window.location.href, "");
+  assert.strictEqual(alerts.length, 0);
+});
+
+test("admin checkAdminAuth redirige si el token está malformado y el usuario no es ADMIN", async () => {
+  installSeams({
+    user: JSON.stringify({ username: "pepe", role: "USER" }),
+    token: "token-sin-puntos"
+  });
+  const { checkAdminAuth } = requireAdmin();
+  await checkAdminAuth();
+  assert.strictEqual(global.window.location.href, "auth.html");
+});
+
+test("admin checkAdminAuth no carga el diagnóstico si la carga de usuarios es rechazada (403)", async () => {
+  const { requests } = installSeams({
+    user: JSON.stringify({ username: "admin", role: "ADMIN" }),
+    token: "tok",
+    fetchImpl: async () => ({ ok: false, status: 403, json: async () => ({}) })
+  });
+  const { checkAdminAuth } = requireAdmin();
+  await checkAdminAuth();
+  assert.strictEqual(requests.length, 1);
+  assert.strictEqual(global.window.location.href, "auth.html");
+});
+
 // --- loadAdminData ------------------------------------------------------
+
+test("admin loadAdminData con 403 avisa y cierra la sesión", async () => {
+  const { alerts, store } = installSeams({
+    user: JSON.stringify({ role: "ADMIN" }),
+    token: "tok",
+    fetchImpl: async () => ({
+      ok: false,
+      status: 403,
+      json: async () => ({ message: "No tienes permisos de administrador." })
+    })
+  });
+  const { loadAdminData } = requireAdmin();
+  const result = await loadAdminData();
+  assert.strictEqual(result, false);
+  assert.ok(alerts.some((m) => m.includes("no tiene permisos de administrador")));
+  assert.strictEqual(store.sobremesa_token, undefined);
+  assert.strictEqual(global.window.location.href, "auth.html");
+});
 
 test("admin loadAdminData éxito renderiza usuarios y actualiza estadísticas", async () => {
   const { elements } = installSeams({
@@ -544,4 +606,251 @@ test("admin logoutAdmin elimina user y token y redirige a auth.html", () => {
   assert.strictEqual(store.sobremesa_user, undefined);
   assert.strictEqual(store.sobremesa_token, undefined);
   assert.strictEqual(global.window.location.href, "auth.html");
+});
+
+// --- Ramas de error restantes ---------------------------------------------
+
+test("admin toggleBan respuesta no ok muestra el mensaje del backend", async () => {
+  const { alerts } = installSeams({
+    token: "tok",
+    fetchImpl: async () => ({ ok: false, json: async () => ({ message: "No puedes banearte" }) })
+  });
+  const { toggleBan } = requireAdmin();
+  await toggleBan(1, true);
+  assert.deepStrictEqual(alerts, ["No puedes banearte"]);
+});
+
+test("admin toggleBan respuesta no ok sin mensaje usa el texto por defecto", async () => {
+  const { alerts } = installSeams({
+    token: "tok",
+    fetchImpl: async () => ({ ok: false, json: async () => ({}) })
+  });
+  const { toggleBan } = requireAdmin();
+  await toggleBan(1, true);
+  assert.deepStrictEqual(alerts, ["Error al actualizar el estado del usuario."]);
+});
+
+test("admin toggleBan con motivo vacío envía el motivo por defecto", async () => {
+  const { requests } = installSeams({ token: "tok" });
+  global.prompt = () => "";
+  const { toggleBan } = requireAdmin();
+  await toggleBan(3, false);
+  const banReq = requests.find((r) => r.url.includes("/ban"));
+  assert.strictEqual(JSON.parse(banReq.opts.body).reason, "Incumplimiento de normas");
+});
+
+test("admin toggleBan éxito sin mensaje usa el texto por defecto", async () => {
+  const { alerts } = installSeams({
+    token: "tok",
+    fetchImpl: async (url) => {
+      if (url.includes("/ban")) {
+        return { ok: true, json: async () => ({}) };
+      }
+      return { ok: true, json: async () => ({ users: [] }) };
+    }
+  });
+  const { toggleBan } = requireAdmin();
+  await toggleBan(3, true);
+  assert.ok(alerts.includes("Estado de baneo actualizado con éxito"));
+});
+
+test("admin toggleRole respuesta no ok muestra el mensaje del backend", async () => {
+  const { alerts } = installSeams({
+    token: "tok",
+    fetchImpl: async () => ({ ok: false, json: async () => ({ message: "Prohibido" }) })
+  });
+  const { toggleRole } = requireAdmin();
+  await toggleRole(2, "USER");
+  assert.deepStrictEqual(alerts, ["Prohibido"]);
+});
+
+test("admin toggleRole respuesta no ok sin mensaje usa el texto por defecto", async () => {
+  const { alerts } = installSeams({
+    token: "tok",
+    fetchImpl: async () => ({ ok: false, json: async () => ({}) })
+  });
+  const { toggleRole } = requireAdmin();
+  await toggleRole(2, "USER");
+  assert.deepStrictEqual(alerts, ["Error al actualizar el rol."]);
+});
+
+test("admin toggleRole éxito sin mensaje usa el texto por defecto", async () => {
+  const { alerts } = installSeams({
+    token: "tok",
+    fetchImpl: async (url) => {
+      if (url.includes("/role")) {
+        return { ok: true, json: async () => ({}) };
+      }
+      return { ok: true, json: async () => ({ users: [] }) };
+    }
+  });
+  const { toggleRole } = requireAdmin();
+  await toggleRole(2, "USER");
+  assert.ok(alerts.includes("Rol actualizado con éxito"));
+});
+
+test("admin toggleRole error de red muestra alerta de conexión", async () => {
+  const { alerts } = installSeams({
+    token: "tok",
+    fetchImpl: async () => {
+      throw new Error("caído");
+    }
+  });
+  const originalError = console.error;
+  console.error = () => {};
+  try {
+    const { toggleRole } = requireAdmin();
+    await toggleRole(2, "ADMIN");
+  } finally {
+    console.error = originalError;
+  }
+  assert.deepStrictEqual(alerts, ["Error de conexión con el servidor."]);
+});
+
+test("admin loadDebugInfo respuesta no ok sin mensaje usa statusText", async () => {
+  const { elements } = installSeams({
+    token: "tok",
+    fetchImpl: async () => ({ ok: false, statusText: "Forbidden", json: async () => ({}) })
+  });
+  const { loadDebugInfo } = requireAdmin();
+  await loadDebugInfo();
+  assert.strictEqual(elements["debug-output"].textContent, "Error al obtener diagnóstico: Forbidden");
+});
+
+// --- toggleDebugLogs y funciones expuestas en window -------------------------
+
+test("admin toggleDebugLogs escribe cinco líneas de log en debug-output", () => {
+  const { elements } = installSeams({ token: "tok" });
+  requireAdmin();
+  global.window.toggleDebugLogs();
+  const lines = elements["debug-output"].textContent.split("\n");
+  assert.strictEqual(lines.length, 5);
+  assert.ok(lines[0].startsWith("[INFO]"));
+  assert.ok(lines.some((l) => l.startsWith("[WARN]")));
+  assert.ok(lines.some((l) => l.startsWith("[DEBUG]")));
+});
+
+test("admin expone sus acciones en window para los onclick del HTML", () => {
+  installSeams({});
+  const mod = requireAdmin();
+  assert.strictEqual(global.window.loadAdminData, mod.loadAdminData);
+  assert.strictEqual(global.window.loadDebugInfo, mod.loadDebugInfo);
+  assert.strictEqual(global.window.toggleBan, mod.toggleBan);
+  assert.strictEqual(global.window.toggleRole, mod.toggleRole);
+  assert.strictEqual(global.window.logoutAdmin, mod.logoutAdmin);
+});
+
+// --- DOMContentLoaded -------------------------------------------------------
+
+function installWithDomListeners(options) {
+  const seams = installSeams(options);
+  const docHandlers = {};
+  global.document.addEventListener = (type, handler) => {
+    (docHandlers[type] ??= []).push(handler);
+  };
+  const searchHandlers = {};
+  seams.elements["user-search"] = {
+    value: "",
+    addEventListener: (type, handler) => {
+      (searchHandlers[type] ??= []).push(handler);
+    }
+  };
+  return { ...seams, docHandlers, searchHandlers };
+}
+
+test("admin DOMContentLoaded comprueba la sesión y filtra al escribir en el buscador", async () => {
+  const users = [
+    { id: 1, username: "ana", email: "ana@x.com", role: "USER", isBanned: false, createdAt: "2024-01-01" },
+    { id: 2, username: "luis", email: "luis@x.com", role: "USER", isBanned: false, createdAt: "2024-01-01" }
+  ];
+  const { docHandlers, searchHandlers, elements, requests } = installWithDomListeners({
+    user: JSON.stringify({ username: "admin", role: "ADMIN" }),
+    token: "tok",
+    fetchImpl: async (url) => {
+      if (url.includes("/admin/users")) {
+        return { ok: true, json: async () => ({ users }) };
+      }
+      return { ok: true, json: async () => ({}) };
+    }
+  });
+  requireAdmin();
+  docHandlers.DOMContentLoaded.forEach((h) => h());
+  await flush();
+  await flush();
+  assert.ok(requests.some((r) => r.url.includes("/admin/users")));
+
+  elements["user-search"].value = "luis";
+  searchHandlers.input.forEach((h) => h());
+  const html = elements["users-table-body"].innerHTML;
+  assert.ok(html.includes("luis"));
+  assert.ok(!html.includes("ana@x.com"));
+});
+
+test("admin DOMContentLoaded registra el error si la inicialización falla", async () => {
+  const { docHandlers } = installWithDomListeners({
+    user: JSON.stringify({ username: "admin", role: "ADMIN" }),
+    token: "tok"
+  });
+  // Forzamos que el acceso a un elemento lance dentro de checkAdminAuth.
+  const originalGet = global.document.getElementById;
+  global.document.getElementById = (id) => {
+    if (id === "user-search") {
+      return null;
+    }
+    if (id === "admin-user-info") {
+      throw new Error("boom");
+    }
+    return originalGet(id);
+  };
+  const errors = [];
+  const originalError = console.error;
+  console.error = (...args) => errors.push(args);
+  try {
+    requireAdmin();
+    docHandlers.DOMContentLoaded.forEach((h) => h());
+    await flush();
+    await flush();
+  } finally {
+    console.error = originalError;
+  }
+  assert.strictEqual(errors.length, 1);
+  assert.strictEqual(errors[0][0], "Error al inicializar admin:");
+  assert.strictEqual(errors[0][1].message, "boom");
+});
+
+test("admin checkAdminAuth rechaza un token sin rol si el usuario guardado no es admin", async () => {
+  const payload = Buffer.from(JSON.stringify({ sub: 1 })).toString("base64");
+  installSeams({ user: JSON.stringify({ username: "u", role: "USER" }), token: `h.${payload}.s` });
+  const { checkAdminAuth } = requireAdmin();
+  await checkAdminAuth();
+  assert.strictEqual(global.window.location.href, "auth.html");
+});
+
+test("admin checkAdminAuth muestra el email cuando el admin no tiene username", async () => {
+  const { elements } = installSeams({
+    user: JSON.stringify({ email: "jefe@x.com", role: "ADMIN" }),
+    token: "tok"
+  });
+  const { checkAdminAuth } = requireAdmin();
+  await checkAdminAuth();
+  assert.ok(elements["admin-user-info"].innerHTML.includes("<strong>jefe@x.com</strong>"));
+});
+
+test("admin loadAdminData respuesta sin usuarios ni mensaje usa el texto por defecto", async () => {
+  const { alerts } = installSeams({
+    token: "tok",
+    fetchImpl: async () => ({ ok: true, json: async () => ({}) })
+  });
+  const { loadAdminData } = requireAdmin();
+  await loadAdminData();
+  assert.deepStrictEqual(alerts, ["Error al cargar usuarios."]);
+});
+
+test("admin renderUsers funciona sin buscador en la página", () => {
+  const { elements } = installSeams({});
+  const originalGet = global.document.getElementById;
+  global.document.getElementById = (id) => (id === "user-search" ? null : originalGet(id));
+  const { renderUsers } = requireAdmin();
+  renderUsers([{ id: 1, username: "ana", email: "a@x.com", role: "USER", createdAt: "2024-01-01" }]);
+  assert.ok(elements["users-table-body"].innerHTML.includes("ana"));
 });

@@ -185,6 +185,89 @@ test("Solitaire gameplay and actions", () => {
   assert.doesNotThrow(() => gameModule.moveToFoundation(0));
 });
 
+// Tablero controlado: columna 0 = 5♠, columna 1 = 9♥, columna 2 = 6♥, base 0 = A♠.
+function setupSolitaireSelection() {
+  gameModule.startSolitaire();
+  const state = gameModule.getState();
+  const card = (rank, value, suit, red) => ({ rank, value, suit, red, faceUp: true });
+  state.columns = [
+    [card("5", 4, "♠", false)],
+    [card("9", 8, "♥", true)],
+    [card("6", 5, "♥", true)],
+    [], [], [], [],
+  ];
+  state.foundations = [[card("A", 0, "♠", false)], [], [], []];
+  state.waste = [card("2", 1, "♠", false)];
+  state.selected = null;
+  return state;
+}
+
+test("Solitaire: pulsar de nuevo la carta seleccionada la deselecciona", () => {
+  const state = setupSolitaireSelection();
+  gameModule.clickCard("column:0:0");
+  assert.deepStrictEqual(state.selected, { id: "column:0:0" });
+  gameModule.clickCard("column:0:0");
+  assert.strictEqual(state.selected, null);
+});
+
+test("Solitaire: pulsar otra carta con movimiento inválido cambia la selección", () => {
+  const state = setupSolitaireSelection();
+  gameModule.clickCard("column:0:0");
+  gameModule.clickCard("column:1:0"); // 5♠ no va sobre 9♥
+  assert.deepStrictEqual(state.selected, { id: "column:1:0" });
+  assert.strictEqual(state.columns[0].length, 1);
+});
+
+test("Solitaire: pulsar otra carta con movimiento válido mueve la carta", () => {
+  const state = setupSolitaireSelection();
+  gameModule.clickCard("column:0:0");
+  gameModule.clickCard("column:2:0"); // 5♠ sobre 6♥
+  assert.strictEqual(state.selected, null);
+  assert.strictEqual(state.columns[0].length, 0);
+  assert.strictEqual(state.columns[2].length, 2);
+});
+
+test("Solitaire: pulsar la carta del descarte seleccionada la deselecciona", () => {
+  const state = setupSolitaireSelection();
+  gameModule.clickCard("waste:0:0");
+  assert.deepStrictEqual(state.selected, { id: "waste:0:0" });
+  gameModule.clickCard("waste:0:0");
+  assert.strictEqual(state.selected, null);
+});
+
+test("Solitaire: pulsar una base con cartas mueve la carta seleccionada", () => {
+  const state = setupSolitaireSelection();
+  gameModule.clickCard("waste:0:0");
+  gameModule.clickCard("foundation:0:0"); // 2♠ sobre A♠
+  assert.strictEqual(state.foundations[0].length, 2);
+  assert.strictEqual(state.waste.length, 0);
+  assert.strictEqual(state.selected, null);
+});
+
+test("Solitaire: pulsar una base sin selección no hace nada", () => {
+  const state = setupSolitaireSelection();
+  gameModule.clickCard("foundation:0:0");
+  assert.strictEqual(state.selected, null);
+  assert.strictEqual(state.foundations[0].length, 1);
+});
+
+test("Solitaire: pulsar una carta boca abajo la gira y quita la selección", () => {
+  const state = setupSolitaireSelection();
+  state.columns[3] = [{ rank: "3", value: 2, suit: "♣", red: false, faceUp: false }];
+  gameModule.clickCard("column:0:0");
+  gameModule.clickCard("column:3:0");
+  assert.strictEqual(state.columns[3][0].faceUp, true);
+  assert.strictEqual(state.selected, null);
+});
+
+test("Solitaire: pulsar una base incompatible deselecciona", () => {
+  const state = setupSolitaireSelection();
+  gameModule.clickCard("column:1:0");
+  gameModule.clickCard("foundation:0:0"); // 9♥ no va sobre A♠
+  assert.strictEqual(state.foundations[0].length, 1);
+  assert.strictEqual(state.selected, null);
+});
+
 test("Game starters and reset", () => {
   assert.doesNotThrow(() => gameModule.startTicTacToe());
   assert.doesNotThrow(() => gameModule.startConnectFour());

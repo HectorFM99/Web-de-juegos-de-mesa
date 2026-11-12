@@ -733,18 +733,42 @@ function clickCard(id) {
     clickPile("stock", 0);
     return;
   }
-  if (id.startsWith("column:")) {
-    const [, col, row] = id.split(":").map(Number);
-    const card = state.columns[col][row];
-    if (!card.faceUp) {
-      card.faceUp = true;
-      state.selected = null;
-    } else if (state.selected) moveToColumn(col);
-    else state.selected = { id };
-  } else if (id.startsWith("waste:")) {
-    state.selected = state.selected?.id === id ? null : { id };
+  // Volver a pulsar la carta seleccionada la deselecciona.
+  if (state.selected?.id === id) {
+    state.selected = null;
+    renderSolitaire();
+    return;
   }
+  if (id.startsWith("column:")) clickColumnCard(id);
+  else if (id.startsWith("waste:")) state.selected = { id };
+  else if (id.startsWith("foundation:")) clickFoundationCard(id);
   renderSolitaire();
+}
+
+function clickColumnCard(id) {
+  const [, col, row] = id.split(":").map(Number);
+  const card = state.columns[col][row];
+  if (!card.faceUp) {
+    card.faceUp = true;
+    state.selected = null;
+    return;
+  }
+  if (!state.selected) {
+    state.selected = { id };
+    return;
+  }
+  const previous = state.selected;
+  moveToColumn(col);
+  // Movimiento inválido: la selección pasa a la carta pulsada.
+  if (state.selected === previous) state.selected = { id };
+}
+
+function clickFoundationCard(id) {
+  if (!state.selected) return;
+  const [, index] = id.split(":").map(Number);
+  moveToFoundation(index);
+  // Si no encajaba en la base, se deselecciona.
+  state.selected = null;
 }
 
 function moveToColumn(index) {
@@ -822,5 +846,6 @@ if (typeof module !== "undefined" && module.exports) {
     moveToColumn,
     moveToFoundation,
     reset,
+    getState: () => state,
   };
 }

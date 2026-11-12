@@ -9,9 +9,16 @@ async function bootstrap() {
   // Security Headers with Helmet
   app.use(helmet());
 
-  // CORS configuration (restrictive or configurable)
+  // CORS: lista blanca de orígenes. FRONTEND_URL admite varios separados por comas.
+  // Por defecto: Docker (8079) y Live Server (5500), tanto con localhost como con 127.0.0.1.
+  const allowedOrigins = (
+    process.env.FRONTEND_URL ||
+    'http://localhost:8079,http://127.0.0.1:8079,http://localhost:5500,http://127.0.0.1:5500'
+  )
+    .split(',')
+    .map((origin) => origin.trim());
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:8079',
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });

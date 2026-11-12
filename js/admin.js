@@ -18,11 +18,19 @@ function getUser() {
   }
 }
 
+function getTokenRole(token) {
+  try {
+    return JSON.parse(atob(token.split('.')[1])).role || null;
+  } catch {
+    return null;
+  }
+}
+
 async function checkAdminAuth() {
   const user = getUser();
   const token = getToken();
 
-  const isAdmin = user && (user.role === 'ADMIN' || user.email === 'admin@lasobremesa.local');
+  const isAdmin = user && (user.role === 'ADMIN' || (token && getTokenRole(token) === 'ADMIN'));
 
   if (!user || !isAdmin || !token) {
     alert('Acceso restringido. Por favor, inicia sesión con la cuenta de administrador.');
@@ -32,7 +40,10 @@ async function checkAdminAuth() {
 
   document.getElementById('admin-user-info').innerHTML = `Conectado como <strong>${user.username || user.email}</strong> <span class="badge badge-admin">ADMIN</span>`;
 
-  await loadAdminData();
+  const loaded = await loadAdminData();
+  if (loaded === false) {
+    return;
+  }
   await loadDebugInfo();
 }
 
@@ -42,6 +53,11 @@ async function loadAdminData() {
     const res = await fetch(`${API_BASE}/admin/users`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (res.status === 401 || res.status === 403) {
+      alert('Tu sesión no tiene permisos de administrador. Vuelve a iniciar sesión.');
+      logoutAdmin();
+      return false;
+    }
     const data = await res.json();
     if (res.ok && data.users) {
       allUsers = data.users;
