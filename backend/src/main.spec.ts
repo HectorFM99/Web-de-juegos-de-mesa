@@ -63,6 +63,37 @@ test('main arranca con helmet, CORS por defecto, validación global y puerto 300
   assert.strictEqual(app.port, 3000);
 });
 
+test('main registra el error y sale con código 1 si el arranque falla', async () => {
+  const failure = new Error('puerto ocupado');
+  const errors: unknown[][] = [];
+  let exitCode: number | undefined;
+  let exited: () => void;
+  const done = new Promise<void>((resolve) => (exited = resolve));
+
+  const originalCreate = NestFactory.create;
+  const originalError = console.error;
+  const originalExit = process.exit;
+  (NestFactory as any).create = async () => {
+    throw failure;
+  };
+  console.error = (...args: unknown[]) => errors.push(args);
+  (process as any).exit = (code: number) => {
+    exitCode = code;
+    exited();
+  };
+  try {
+    delete require.cache[require.resolve('./main')];
+    require('./main');
+    await done;
+  } finally {
+    (NestFactory as any).create = originalCreate;
+    console.error = originalError;
+    process.exit = originalExit;
+  }
+  assert.strictEqual(exitCode, 1);
+  assert.deepStrictEqual(errors, [['No se pudo arrancar el servidor:', failure]]);
+});
+
 test('main usa FRONTEND_URL (separada por comas) y PORT si están definidas', async () => {
   const app = await bootWith({ FRONTEND_URL: 'https://a.com, https://b.com', PORT: '4000' });
   assert.deepStrictEqual(app.cors.origin, ['https://a.com', 'https://b.com']);
