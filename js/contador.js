@@ -1,3 +1,4 @@
+/* global module */
 let visitas = 0;
 
 function contar(nombre) {
@@ -22,3 +23,8 @@ function contar(nombre) {
 }
 
 contar("visitante");
+
+// Exportable para tests (Node) sin afectar la carga como <script> en el navegador.
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { contar };
+}

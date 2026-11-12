@@ -1,5 +1,8 @@
 FROM node:20-alpine AS builder
 
+# Prisma necesita OpenSSL para detectar y cargar su motor de consultas
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 COPY package*.json ./
@@ -13,6 +16,8 @@ RUN npx prisma generate
 RUN npm run build
 
 FROM node:20-alpine AS runner
+
+RUN apk add --no-cache openssl
 
 WORKDIR /app
 

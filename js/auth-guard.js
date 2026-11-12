@@ -1,8 +1,12 @@
 (function() {
   const isAuthPage = window.location.pathname.includes('auth.html');
   const userStr = localStorage.getItem('sobremesa_user');
-  
-  if (!userStr && !isAuthPage) {
+  const sessionToken = localStorage.getItem('sobremesa_token');
+
+  // Una sesión sin token (p. ej. creada sin backend) no es válida: se descarta.
+  if ((!userStr || !sessionToken) && !isAuthPage) {
+    localStorage.removeItem('sobremesa_user');
+    localStorage.removeItem('sobremesa_token');
     const inHtmlDir = window.location.pathname.includes('/html/');
     window.location.href = inHtmlDir ? 'auth.html' : 'html/auth.html';
     return;
@@ -18,7 +22,7 @@
     if (userStrLocal) {
       try {
         const user = JSON.parse(userStrLocal);
-        if (user.role === 'ADMIN' || user.email === 'admin@lasobremesa.local') {
+        if (user.role === 'ADMIN') {
           isAdmin = true;
         }
       } catch {
@@ -30,7 +34,7 @@
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role === 'ADMIN' || payload.email === 'admin@lasobremesa.local' || payload.sub === 1) {
+        if (payload.role === 'ADMIN') {
           isAdmin = true;
         }
       } catch {

@@ -55,9 +55,19 @@ test("auth-guard redirects when user is missing and not on auth page", () => {
 });
 
 test("auth-guard does not redirect when user exists", () => {
-  installAuthGuardSeams({ pathname: "/index.html", user: "testuser" });
+  installAuthGuardSeams({ pathname: "/index.html", user: "testuser", token: "tok" });
   requireAuthGuard();
   assert.strictEqual(global.window.location.href, "");
+});
+
+test("auth-guard descarta una sesión sin token y redirige al login", () => {
+  const { store } = installAuthGuardSeams({
+    pathname: "/index.html",
+    user: JSON.stringify({ email: "admin@lasobremesa.local" })
+  });
+  requireAuthGuard();
+  assert.strictEqual(global.window.location.href, "html/auth.html");
+  assert.strictEqual(store.sobremesa_user, undefined);
 });
 
 test("auth-guard does not redirect on auth page even if user is missing", () => {
@@ -73,7 +83,7 @@ test("auth-guard redirects from /html/ to auth.html when user is missing", () =>
 });
 
 test("auth-guard does not redirect from html/ when user exists", () => {
-  installAuthGuardSeams({ pathname: "/html/ajedrez.html", user: "testuser" });
+  installAuthGuardSeams({ pathname: "/html/ajedrez.html", user: "testuser", token: "tok" });
   requireAuthGuard();
   assert.strictEqual(global.window.location.href, "");
 });
@@ -101,19 +111,20 @@ test("logout redirects from index.html to html/auth.html", () => {
 test("auth-guard shows admin link when user has ADMIN role", () => {
   const { adminLink } = installAuthGuardSeams({
     pathname: "/html/admin.html",
-    user: JSON.stringify({ role: "ADMIN", email: "a@b.com" })
+    user: JSON.stringify({ role: "ADMIN", email: "a@b.com" }),
+    token: "tok"
   });
   requireAuthGuard();
   assert.strictEqual(adminLink.style.display, "inline-block");
 });
 
-test("auth-guard shows admin link when user email is admin@lasobremesa.local", () => {
+test("auth-guard hides admin link when only the user email is admin@lasobremesa.local (role USER)", () => {
   const { adminLink } = installAuthGuardSeams({
     pathname: "/html/admin.html",
     user: JSON.stringify({ role: "USER", email: "admin@lasobremesa.local" })
   });
   requireAuthGuard();
-  assert.strictEqual(adminLink.style.display, "inline-block");
+  assert.notStrictEqual(adminLink.style.display, "inline-block");
 });
 
 test("auth-guard keeps admin link hidden for a regular user", () => {
@@ -136,7 +147,7 @@ test("auth-guard shows admin link when token payload role is ADMIN", () => {
   assert.strictEqual(adminLink.style.display, "inline-block");
 });
 
-test("auth-guard shows admin link when token payload email is admin@lasobremesa.local", () => {
+test("auth-guard hides admin link when only the token payload email is admin@lasobremesa.local", () => {
   const payload = Buffer.from(JSON.stringify({ email: "admin@lasobremesa.local" })).toString("base64");
   const { adminLink } = installAuthGuardSeams({
     pathname: "/html/admin.html",
@@ -144,10 +155,10 @@ test("auth-guard shows admin link when token payload email is admin@lasobremesa.
     token: `header.${payload}.sig`
   });
   requireAuthGuard();
-  assert.strictEqual(adminLink.style.display, "inline-block");
+  assert.notStrictEqual(adminLink.style.display, "inline-block");
 });
 
-test("auth-guard shows admin link when token payload sub is 1", () => {
+test("auth-guard hides admin link when token payload sub is 1 without ADMIN role", () => {
   const payload = Buffer.from(JSON.stringify({ sub: 1 })).toString("base64");
   const { adminLink } = installAuthGuardSeams({
     pathname: "/html/admin.html",
@@ -155,7 +166,7 @@ test("auth-guard shows admin link when token payload sub is 1", () => {
     token: `header.${payload}.sig`
   });
   requireAuthGuard();
-  assert.strictEqual(adminLink.style.display, "inline-block");
+  assert.notStrictEqual(adminLink.style.display, "inline-block");
 });
 
 test("auth-guard ignores malformed token payload", () => {
@@ -172,9 +183,55 @@ test("auth-guard runs checkAdminDisplay on DOMContentLoaded when document is loa
   const { adminLink, emitDOMContentLoaded } = installAuthGuardSeams({
     pathname: "/html/admin.html",
     docReady: "loading",
-    user: JSON.stringify({ role: "ADMIN", email: "a@b.com" })
+    user: JSON.stringify({ role: "ADMIN", email: "a@b.com" }),
+    token: "tok"
   });
   requireAuthGuard();
   emitDOMContentLoaded();
   assert.strictEqual(adminLink.style.display, "inline-block");
+});
+
+test("auth-guard no hace nada si el documento desaparece antes de DOMContentLoaded", () => {
+  const { adminLink, emitDOMContentLoaded } = installAuthGuardSeams({
+    pathname: "/index.html",
+    user: JSON.stringify({ role: "ADMIN" }),
+    token: "tok",
+    docReady: "loading"
+  });
+  requireAuthGuard();
+  const savedDocument = global.document;
+  delete global.document;
+  try {
+    assert.doesNotThrow(() => emitDOMContentLoaded());
+  } finally {
+    global.document = savedDocument;
+  }
+  assert.strictEqual(adminLink.style.display, null);
+});
+
+test("auth-guard tolera que no exista el enlace de admin en la página", () => {
+  installAuthGuardSeams({
+    pathname: "/html/memoria.html",
+    user: JSON.stringify({ role: "ADMIN" }),
+    token: "tok"
+  });
+  global.document.getElementById = () => null;
+  assert.doesNotThrow(() => requireAuthGuard());
+  assert.strictEqual(global.window.location.href, "");
+});
+
+test("auth-guard ignora un usuario guardado con JSON malformado", () => {
+  const { adminLink } = installAuthGuardSeams({
+    pathname: "/index.html",
+    user: "{no-es-json",
+    token: "tok"
+  });
+  requireAuthGuard();
+  assert.strictEqual(adminLink.style.display, null);
+});
+
+test("auth-guard expone logout en window", () => {
+  installAuthGuardSeams({ pathname: "/index.html", user: "{}", token: "tok" });
+  requireAuthGuard();
+  assert.strictEqual(typeof global.window.logout, "function");
 });

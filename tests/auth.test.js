@@ -96,8 +96,10 @@ test("auth.js handleLogin failure with alert message", async () => {
   assert.strictEqual(alerts[0], 'Credenciales inválidas');
 });
 
-test("auth.js handleLogin catch fallback", async () => {
+test("auth.js handleLogin sin backend avisa y no crea sesión falsa", async () => {
   const store = {};
+  const alerts = [];
+  global.alert = (msg) => alerts.push(msg);
   global.localStorage = {
     getItem: () => null,
     setItem: (k, v) => { store[k] = v; }
@@ -118,8 +120,9 @@ test("auth.js handleLogin catch fallback", async () => {
   require("../js/auth.js");
 
   await global.window.handleLogin({ preventDefault: () => {} });
-  assert.strictEqual(global.window.location.href, "../index.html");
-  assert.ok(store.sobremesa_user);
+  assert.strictEqual(global.window.location.href, "");
+  assert.strictEqual(store.sobremesa_user, undefined);
+  assert.ok(alerts[0].includes("No se pudo conectar con el servidor"));
 });
 
 test("auth.js handleRegister success", async () => {
@@ -182,8 +185,10 @@ test("auth.js handleRegister failure with array message", async () => {
   assert.strictEqual(alerts[0], 'Error 1, Error 2');
 });
 
-test("auth.js handleRegister catch fallback", async () => {
+test("auth.js handleRegister sin backend avisa y no crea sesión falsa", async () => {
   const store = {};
+  const alerts = [];
+  global.alert = (msg) => alerts.push(msg);
   global.localStorage = {
     getItem: () => null,
     setItem: (k, v) => { store[k] = v; }
@@ -205,13 +210,33 @@ test("auth.js handleRegister catch fallback", async () => {
   require("../js/auth.js");
 
   await global.window.handleRegister({ preventDefault: () => {} });
-  assert.strictEqual(global.window.location.href, "../index.html");
-  assert.ok(store.sobremesa_user);
+  assert.strictEqual(global.window.location.href, "");
+  assert.strictEqual(store.sobremesa_user, undefined);
+  assert.ok(alerts[0].includes("No se pudo conectar con el servidor"));
+});
+
+test("auth.js no redirige si hay usuario guardado pero no token", () => {
+  global.localStorage = {
+    getItem: (k) => (k === "sobremesa_user" ? JSON.stringify({ email: "a@b.com" }) : null),
+    setItem: () => {}
+  };
+  global.window = {
+    location: { href: "" }
+  };
+  global.document = {
+    getElementById: () => null
+  };
+
+  delete require.cache[require.resolve("../js/auth.js")];
+  require("../js/auth.js");
+
+  assert.strictEqual(global.window.location.href, "");
 });
 
 test("auth.js redirects to index if already authenticated on load", () => {
+  const session = { sobremesa_user: JSON.stringify({ id: 1 }), sobremesa_token: "tok" };
   global.localStorage = {
-    getItem: (k) => (k === "sobremesa_user" ? JSON.stringify({ id: 1 }) : null),
+    getItem: (k) => session[k] ?? null,
     setItem: () => {}
   };
   global.window = {
@@ -225,4 +250,97 @@ test("auth.js redirects to index if already authenticated on load", () => {
   require("../js/auth.js");
 
   assert.strictEqual(global.window.location.href, "../index.html");
+});
+
+// --- Casos adicionales -------------------------------------------------------
+
+function installAuthSeams({ fetchImpl, fields = {} } = {}) {
+  const store = {};
+  const alerts = [];
+  global.localStorage = {
+    getItem: (k) => store[k] || null,
+    setItem: (k, v) => { store[k] = v; }
+  };
+  global.window = { location: { href: "" } };
+  global.alert = (msg) => alerts.push(msg);
+  global.document = {
+    getElementById: (id) => (id in fields ? { value: fields[id] } : null)
+  };
+  global.fetch = fetchImpl;
+  delete require.cache[require.resolve("../js/auth.js")];
+  require("../js/auth.js");
+  return { store, alerts };
+}
+
+test("auth.js handleLogin sin mensaje del backend muestra el texto por defecto", async () => {
+  const { alerts, store } = installAuthSeams({
+    fields: { "login-email": "a@a.com", "login-password": "x" },
+    fetchImpl: async () => ({ ok: false, json: async () => ({}) })
+  });
+  await global.window.handleLogin({ preventDefault: () => {} });
+  assert.deepStrictEqual(alerts, ["Error en la autenticación."]);
+  assert.strictEqual(store.sobremesa_user, undefined);
+  assert.strictEqual(global.window.location.href, "");
+});
+
+test("auth.js handleLogin sin access_token guarda el usuario pero no el token", async () => {
+  const { store } = installAuthSeams({
+    fields: { "login-email": "a@a.com", "login-password": "x" },
+    fetchImpl: async () => ({ ok: true, json: async () => ({ user: { id: 7 } }) })
+  });
+  await global.window.handleLogin({ preventDefault: () => {} });
+  assert.strictEqual(store.sobremesa_user, JSON.stringify({ id: 7 }));
+  assert.strictEqual(store.sobremesa_token, undefined);
+  assert.strictEqual(global.window.location.href, "../index.html");
+});
+
+test("auth.js handleLogin envía email y contraseña al endpoint de login", async () => {
+  const requests = [];
+  installAuthSeams({
+    fields: { "login-email": "a@a.com", "login-password": "secreta" },
+    fetchImpl: async (url, opts) => {
+      requests.push({ url, opts });
+      return { ok: true, json: async () => ({ user: {}, access_token: "t" }) };
+    }
+  });
+  await global.window.handleLogin({ preventDefault: () => {} });
+  assert.strictEqual(requests[0].url, "http://localhost:3000/auth/login");
+  assert.strictEqual(requests[0].opts.method, "POST");
+  assert.deepStrictEqual(JSON.parse(requests[0].opts.body), { email: "a@a.com", password: "secreta" });
+});
+
+test("auth.js switchTab activa el formulario y cambia el texto del pie", () => {
+  const makeElement = () => {
+    const classes = new Set();
+    return {
+      classes,
+      classList: { add: (c) => classes.add(c), remove: (c) => classes.delete(c) },
+      innerHTML: ""
+    };
+  };
+  const elements = {
+    "form-login": makeElement(),
+    "form-register": makeElement(),
+    "tab-login": makeElement(),
+    "tab-register": makeElement(),
+    "auth-footer-text": makeElement()
+  };
+  global.document = { getElementById: (id) => elements[id] || null };
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+  global.window = { location: { href: "" } };
+  delete require.cache[require.resolve("../js/auth.js")];
+  require("../js/auth.js");
+
+  global.window.switchTab("register");
+  assert.ok(elements["form-register"].classes.has("active"));
+  assert.ok(!elements["form-login"].classes.has("active"));
+  assert.ok(elements["tab-register"].classes.has("active"));
+  assert.ok(elements["auth-footer-text"].innerHTML.includes("Inicia sesión aquí"));
+
+  global.window.switchTab("login");
+  assert.ok(elements["form-login"].classes.has("active"));
+  assert.ok(!elements["form-register"].classes.has("active"));
+  assert.ok(elements["tab-login"].classes.has("active"));
+  assert.ok(!elements["tab-register"].classes.has("active"));
+  assert.ok(elements["auth-footer-text"].innerHTML.includes("Regístrate aquí"));
 });

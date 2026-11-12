@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from './roles.guard';
 import { Roles } from './roles.decorator';
@@ -15,6 +16,8 @@ import { AdminService } from './admin.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
+// El panel hace varias peticiones por acción; el límite global (10/min) lo bloqueaba.
+@Throttle({ default: { limit: 60, ttl: 60000 } })
 @Controller('admin')
 export class AdminController {
   constructor(private adminService: AdminService) {}
