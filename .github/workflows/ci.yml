@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: 24
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
 
       - name: Instalar dependencias
         run: npm ci
@@ -29,6 +32,18 @@ jobs:
 
       - name: Test
         run: npm test
+
+      - name: Instalar dependencias del backend
+        run: npm ci
+        working-directory: backend
+
+      - name: Generar cliente de Prisma
+        run: npx prisma generate
+        working-directory: backend
+
+      - name: Test y cobertura del backend
+        run: npm run test:cov
+        working-directory: backend
 
       - name: Build de la imagen Docker
         run: docker build -t web:ci .
