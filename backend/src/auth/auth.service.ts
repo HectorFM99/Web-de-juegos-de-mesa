@@ -7,8 +7,8 @@ import * as argon2 from 'argon2';
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
-    private jwt: JwtService,
+    private readonly prisma: PrismaService,
+    private readonly jwt: JwtService,
   ) {}
 
   async register(dto: RegisterDto) {

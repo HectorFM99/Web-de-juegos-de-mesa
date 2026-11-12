@@ -8,7 +8,7 @@ import { Roles } from '../admin/roles.decorator';
 @UseGuards(JwtAuthGuard)
 @Controller('matches')
 export class MatchesController {
-  constructor(private matchesService: MatchesService) {}
+  constructor(private readonly matchesService: MatchesService) {}
 
   @Post()
   async create(@Req() req: any, @Body() dto: CreateMatchDto) {

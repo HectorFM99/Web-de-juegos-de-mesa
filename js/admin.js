@@ -86,11 +86,32 @@ function updateStats(users) {
   })
     .then((r) => r.json())
     .then((d) => {
-      if (d && d.database) {
+      if (d?.database) {
         document.getElementById('stat-matches').textContent = d.database.totalMatches || 0;
       }
     })
     .catch(() => {});
+}
+
+function banStatusBadge(user) {
+  if (!user.banned) {
+    return '<span class="badge badge-active">Activo</span>';
+  }
+  const reason = escapeHtml(user.bannedReason || 'Sin motivo');
+  return `<span class="badge badge-banned" title="${reason}">Baneado</span>`;
+}
+
+function banAction(user) {
+  if (user.role === 'ADMIN') {
+    return '<span style="color: #999; font-size: 12px;">Protegido</span>';
+  }
+  const buttonClass = user.banned ? 'btn-unban' : 'btn-ban';
+  const label = user.banned ? 'Desbanear' : 'Banear';
+  return `
+          <button class="btn-action ${buttonClass}" onclick="toggleBan(${user.id}, ${user.banned})">
+            ${label}
+          </button>
+        `;
 }
 
 function renderUsers(users) {
@@ -114,17 +135,11 @@ function renderUsers(users) {
       <td>${escapeHtml(u.email)}</td>
       <td><span class="badge ${u.role === 'ADMIN' ? 'badge-admin' : 'badge-user'}">${u.role}</span></td>
       <td>
-        ${u.banned 
-          ? `<span class="badge badge-banned" title="${escapeHtml(u.bannedReason || 'Sin motivo')}">Baneado</span>` 
-          : '<span class="badge badge-active">Activo</span>'}
+        ${banStatusBadge(u)}
       </td>
       <td>${new Date(u.createdAt).toLocaleDateString()}</td>
       <td>
-        ${u.role !== 'ADMIN' ? `
-          <button class="btn-action ${u.banned ? 'btn-unban' : 'btn-ban'}" onclick="toggleBan(${u.id}, ${u.banned})">
-            ${u.banned ? 'Desbanear' : 'Banear'}
-          </button>
-        ` : '<span style="color: #999; font-size: 12px;">Protegido</span>'}
+        ${banAction(u)}
         <button class="btn-action btn-role" onclick="toggleRole(${u.id}, '${u.role}')">
           ${u.role === 'ADMIN' ? 'Quitar Admin' : 'Hacer Admin'}
         </button>
@@ -231,7 +246,7 @@ function escapeHtml(str) {
   if (!str) {
     return '';
   }
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return str.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 }
 
 function logoutAdmin() {
