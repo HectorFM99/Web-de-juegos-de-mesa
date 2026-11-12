@@ -20,14 +20,29 @@ jobs:
       - name: Preparar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
 
       - name: Instalar dependencias
         run: npm ci
 
       - name: Test
         run: npm test
+
+      - name: Instalar dependencias del backend
+        run: npm ci
+        working-directory: backend
+
+      - name: Generar cliente de Prisma
+        run: npx prisma generate
+        working-directory: backend
+
+      - name: Test y cobertura del backend
+        run: npm run test:cov
+        working-directory: backend
 
       - name: Run SonarQube analysis
         uses: SonarSource/sonarqube-scan-action@v8.3.0

@@ -3,3 +3,6 @@ dist
 .env
 *.spec.ts
 *.tsbuildinfo
+coverage
+scripts
+.c8rc.json
