@@ -331,3 +331,79 @@ test("ajedrez: pulsar una casilla inalcanzable con una pieza seleccionada cambia
   dom.board.children[51].click();
   assert.strictEqual(state().selected, 51);
 });
+
+// --- Solitario: cartas boca abajo y apilado ------------------------------------
+
+test("solitario: una carta boca abajo con cartas encima no se puede girar", () => {
+  const { game, state } = loadGame("solitaire");
+  const s = emptySolitaire(state);
+  s.columns[2] = [
+    card("4", 3, "♣", { faceUp: false }),
+    card("9", 8, "♥", { red: true, faceUp: false }),
+    card("7", 6, "♠"),
+  ];
+  game.clickCard("column:2:0");
+  game.clickCard("column:2:1");
+  assert.strictEqual(s.columns[2][0].faceUp, false);
+  assert.strictEqual(s.columns[2][1].faceUp, false);
+  assert.strictEqual(s.selected, null);
+});
+
+test("solitario: pulsar una carta tapada no pierde la selección actual", () => {
+  const { game, state } = loadGame("solitaire");
+  const s = emptySolitaire(state);
+  s.waste = [card("5", 4, "♦", { red: true })];
+  s.columns[1] = [card("J", 10, "♣", { faceUp: false }), card("6", 5, "♠")];
+  game.clickCard("waste:0:0");
+  game.clickCard("column:1:0");
+  assert.deepStrictEqual(s.selected, { id: "waste:0:0" });
+  assert.strictEqual(s.columns[1][0].faceUp, false);
+});
+
+test("solitario: la carta tapada se puede girar cuando se retiran las de encima", () => {
+  const { game, state } = loadGame("solitaire");
+  const s = emptySolitaire(state);
+  s.columns[0] = [card("4", 3, "♣", { faceUp: false })];
+  s.columns[1] = [card("8", 7, "♦", { red: true, faceUp: false }), card("K", 12, "♠")];
+  game.clickCard("column:1:0");
+  assert.strictEqual(s.columns[1][0].faceUp, false);
+  // Al mover el rey a una columna vacía, la carta de debajo queda descubierta.
+  s.columns[3] = [];
+  game.clickCard("column:1:1");
+  game.clickPile("tableau", 3);
+  assert.strictEqual(s.columns[3][0].rank, "K");
+  assert.strictEqual(s.columns[1][0].faceUp, true);
+  // Y una carta tapada que queda sola arriba se gira al pulsarla.
+  game.clickCard("column:0:0");
+  assert.strictEqual(s.columns[0][0].faceUp, true);
+});
+
+test("solitario: las cartas de una columna se escalonan y la columna crece con ellas", () => {
+  const { dom, game, state } = loadGame("solitaire");
+  const s = emptySolitaire(state);
+  s.columns[4] = [card("9", 8, "♠", { faceUp: false }), card("8", 7, "♥", { red: true }), card("7", 6, "♠")];
+  game.renderSolitaire();
+  const column = dom.board.children[PILE.column(4)];
+  assert.deepStrictEqual(
+    column.children.map((c) => c.style.top),
+    ["calc(0 * var(--stack-offset))", "calc(1 * var(--stack-offset))", "calc(2 * var(--stack-offset))"]
+  );
+  assert.strictEqual(column.style.minHeight, "calc(var(--card-h) + 2 * var(--stack-offset))");
+  assert.strictEqual(dom.board.children[PILE.column(0)].style.minHeight, "calc(var(--card-h) + 0 * var(--stack-offset))");
+});
+
+test("solitario: mazo, descarte, hueco y las cuatro bases forman la fila superior de 7 casillas", () => {
+  const { dom } = loadGame("solitaire");
+  const classes = dom.board.children.map((child) => child.className);
+  assert.deepStrictEqual(classes.slice(0, 7), [
+    "solitaire-pile stock",
+    "solitaire-pile waste",
+    "solitaire-spacer",
+    "solitaire-pile foundation",
+    "solitaire-pile foundation",
+    "solitaire-pile foundation",
+    "solitaire-pile foundation",
+  ]);
+  assert.ok(classes.slice(7).every((c) => c === "solitaire-pile tableau"));
+  assert.strictEqual(classes.length, 14);
+});

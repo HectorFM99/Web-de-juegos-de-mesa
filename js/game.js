@@ -641,8 +641,11 @@ function renderSolitaire() {
     if (type === "tableau") {
       cards.forEach((card, cardIndex) => {
         const cardId = `column:${index}:${cardIndex}`;
-        pile.append(makeCard(card, cardId, cardIndex * 24));
+        pile.append(makeCard(card, cardId, cardIndex));
       });
+      // La columna crece con las cartas apiladas (cada una asoma --stack-offset).
+      const stacked = Math.max(cards.length - 1, 0);
+      pile.style.minHeight = `calc(var(--card-h) + ${stacked} * var(--stack-offset))`;
     } else if (cards.length) {
       const card = cards.at(-1);
       pile.append(makeCard(card, `${type}:${index}:${cards.length - 1}`, 0));
@@ -673,7 +676,7 @@ function makeCard(card, id, offset) {
   const faceClass = card.faceUp ? "" : " face-down";
   const selectedClass = state.selected?.id === id ? " selected" : "";
   button.className = `playing-card${colorClass}${faceClass}${selectedClass}`;
-  button.style.top = `${offset}px`;
+  button.style.top = `calc(${offset} * var(--stack-offset))`;
   button.textContent = card.faceUp ? `${card.rank}${card.suit}` : "✳";
   button.setAttribute(
     "aria-label",
@@ -747,10 +750,14 @@ function clickCard(id) {
 
 function clickColumnCard(id) {
   const [, col, row] = id.split(":").map(Number);
-  const card = state.columns[col][row];
+  const column = state.columns[col];
+  const card = column[row];
   if (!card.faceUp) {
-    card.faceUp = true;
-    state.selected = null;
+    // Una carta boca abajo solo se puede girar cuando no tiene cartas encima.
+    if (row === column.length - 1) {
+      card.faceUp = true;
+      state.selected = null;
+    }
     return;
   }
   if (!state.selected) {
