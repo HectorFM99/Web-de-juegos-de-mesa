@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Patch,
-  Post,
   Body,
   Param,
   UseGuards,
@@ -20,7 +19,7 @@ import { AdminService } from './admin.service';
 @Throttle({ default: { limit: 60, ttl: 60000 } })
 @Controller('admin')
 export class AdminController {
-  constructor(private adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService) {}
 
   @Get('users')
   async listUsers(@Req() req: any) {

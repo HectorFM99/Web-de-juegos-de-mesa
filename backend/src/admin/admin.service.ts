@@ -23,7 +23,7 @@ export type SafeUser = {
 export class AdminService implements OnModuleInit {
   private readonly logger = new Logger(AdminService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async onModuleInit(): Promise<void> {
     try {

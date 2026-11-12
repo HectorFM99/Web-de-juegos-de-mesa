@@ -4,7 +4,7 @@ import { CreateMatchDto } from './dto/match.dto';
 
 @Injectable()
 export class MatchesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: number, dto: CreateMatchDto) {
     return this.prisma.match.create({
