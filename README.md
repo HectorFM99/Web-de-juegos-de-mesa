@@ -47,7 +47,7 @@ En este proyecto, **Docker Compose** orquesta tres servicios principales:
 **SonarCloud** se ha integrado en el flujo de trabajo del proyecto para realizar **análisis estáticos de código** automatizados en cada integración continua (CI) mediante GitHub Actions.
 - Evalúa de forma continua la calidad del código, detectando posibles *code smells*, duplicidades y vulnerabilidades de seguridad.
 - Actúa como puerta de calidad (*Quality Gate*) obligatoria, impidiendo que cambios con deficiencias entren en la rama principal.
-- Ayuda a mantener buenas prácticas de desarrollo y un estándar profesional en toda la base de código frontend.
+- Ayuda a mantener buenas prácticas de desarrollo y un estándar profesional en toda la base de código frontend. 
 
 ## 🛠️ Desarrollo
 
