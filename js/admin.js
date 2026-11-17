@@ -103,12 +103,12 @@ function banStatusBadge(user) {
 
 function banAction(user) {
   if (user.role === 'ADMIN') {
-    return '<span style="color: #999; font-size: 12px;">Protegido</span>';
+    return '<span class="admin-protected">Protegido</span>';
   }
   const buttonClass = user.banned ? 'btn-unban' : 'btn-ban';
   const label = user.banned ? 'Desbanear' : 'Banear';
   return `
-          <button class="btn-action ${buttonClass}" onclick="toggleBan(${user.id}, ${user.banned})">
+          <button class="btn-action ${buttonClass}" data-action="ban" data-id="${user.id}" data-banned="${Boolean(user.banned)}">
             ${label}
           </button>
         `;
@@ -124,7 +124,7 @@ function renderUsers(users) {
   );
 
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No se encontraron usuarios.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No se encontraron usuarios.</td></tr>';
     return;
   }
 
@@ -140,7 +140,7 @@ function renderUsers(users) {
       <td>${new Date(u.createdAt).toLocaleDateString()}</td>
       <td>
         ${banAction(u)}
-        <button class="btn-action btn-role" onclick="toggleRole(${u.id}, '${u.role}')">
+        <button class="btn-action btn-role" data-action="role" data-id="${u.id}" data-role="${escapeHtml(u.role)}">
           ${u.role === 'ADMIN' ? 'Quitar Admin' : 'Hacer Admin'}
         </button>
       </td>
@@ -249,6 +249,25 @@ function escapeHtml(str) {
   return str.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 }
 
+// Acciones de los botones con data-action (sustituyen a los onclick inline, que bloquea la CSP).
+const ADMIN_ACTIONS = {
+  logout: () => logoutAdmin(),
+  reload: () => loadAdminData(),
+  debug: () => loadDebugInfo(),
+  logs: () => toggleDebugLogs(),
+  ban: (el) => toggleBan(Number(el.dataset.id), el.dataset.banned === 'true'),
+  role: (el) => toggleRole(Number(el.dataset.id), el.dataset.role)
+};
+
+// Delegación de eventos: un único listener sirve también para los botones que se generan en la tabla.
+function handleAdminClick(event) {
+  const button = event.target.closest('[data-action]');
+  const action = button && ADMIN_ACTIONS[button.dataset.action];
+  if (action) {
+    action(button);
+  }
+}
+
 function logoutAdmin() {
   localStorage.removeItem('sobremesa_user');
   localStorage.removeItem('sobremesa_token');
@@ -256,6 +275,7 @@ function logoutAdmin() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('click', handleAdminClick);
   checkAdminAuth().catch((err) => console.error('Error al inicializar admin:', err));
   const searchEl = document.getElementById('user-search');
   if (searchEl) {
@@ -264,13 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
-window.loadAdminData = loadAdminData;
-window.loadDebugInfo = loadDebugInfo;
-window.toggleDebugLogs = toggleDebugLogs;
-window.toggleBan = toggleBan;
-window.toggleRole = toggleRole;
-window.logoutAdmin = logoutAdmin;
 
 // Exportable para tests (Node) sin afectar la carga como <script> en el navegador.
 if (typeof module !== "undefined" && module.exports) {
@@ -284,6 +297,8 @@ if (typeof module !== "undefined" && module.exports) {
     toggleBan,
     toggleRole,
     loadDebugInfo,
+    toggleDebugLogs,
+    handleAdminClick,
     escapeHtml,
     logoutAdmin
   };

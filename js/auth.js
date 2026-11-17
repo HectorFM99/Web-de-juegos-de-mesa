@@ -15,13 +15,13 @@ function switchTab(tab) {
     registerForm.classList.remove('active');
     tabLogin.classList.add('active');
     tabRegister.classList.remove('active');
-    footerText.innerHTML = '¿Aún no tienes cuenta? <button type="button" class="link-button" onclick="switchTab(\'register\')">Regístrate aquí</button>';
+    footerText.innerHTML = '¿Aún no tienes cuenta? <button type="button" class="link-button" data-tab="register">Regístrate aquí</button>';
   } else {
     registerForm.classList.add('active');
     loginForm.classList.remove('active');
     tabRegister.classList.add('active');
     tabLogin.classList.remove('active');
-    footerText.innerHTML = '¿Ya tienes cuenta? <button type="button" class="link-button" onclick="switchTab(\'login\')">Inicia sesión aquí</button>';
+    footerText.innerHTML = '¿Ya tienes cuenta? <button type="button" class="link-button" data-tab="login">Inicia sesión aquí</button>';
   }
 }
 
@@ -67,6 +67,34 @@ async function handleRegister(e) {
   await authenticateUser('register', { username, email, password });
 }
 
+// Pestañas y enlaces del pie (data-tab) y envío de formularios, sin onclick/onsubmit inline (CSP).
+// El script se carga con defer, así que el DOM ya está disponible.
+function handleTabClick(event) {
+  const button = event.target.closest('[data-tab]');
+  if (button) {
+    switchTab(button.dataset.tab);
+  }
+}
+
+function bindAuthEvents() {
+  const bindings = [
+    ['tab-login', 'click', handleTabClick],
+    ['tab-register', 'click', handleTabClick],
+    ['auth-footer-text', 'click', handleTabClick],
+    ['form-login', 'submit', handleLogin],
+    ['form-register', 'submit', handleRegister]
+  ];
+  for (const [id, type, handler] of bindings) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener(type, handler);
+    }
+  }
+}
+
+bindAuthEvents();
+
 window.switchTab = switchTab;
+window.handleTabClick = handleTabClick;
 window.handleLogin = handleLogin;
 window.handleRegister = handleRegister;

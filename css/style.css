@@ -62,6 +62,12 @@ a {
 .main-nav a:hover, .main-nav .nav-button:hover {
   color:var(--rust)
 }
+/* Enlace al panel: oculto hasta que auth-guard.js confirme que el usuario es ADMIN */
+.main-nav .nav-admin {
+  display: none;
+  color: #1e40af;
+  font-weight: 600;
+}
 .main-nav .nav-button {
   background: none;
   border: none;

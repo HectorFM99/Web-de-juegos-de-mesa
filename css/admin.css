@@ -1,0 +1,212 @@
+/* Panel de administración */
+/* Colores del panel adaptados a la temática La Sobremesa */
+:root {
+  --acbg: #ebe3d2;      /* fondo tarjetas claro */
+  --acbd: #d8d0bf;      /* borde */
+  --actx: #24261e;      /* texto principal */
+  --acmu: #777666;      /* texto secundario */
+  --acac: #b56445;      /* acento óxido */
+  --acgr: #354b39;      /* verde oscuro */
+  --acth: #f5f0e5;      /* fondo encabezado tabla */
+  --acrh: rgba(181,100,69,0.08);
+  --acib: #f5f0e5;      /* fondo input */
+  --acbb: #d8d0bf;      /* borde input */
+  --acdb: #24261e;      /* fondo debug */
+  --acdt: #f5f0e5;      /* texto debug */
+}
+body[data-theme="dark"] {
+  --acbg: #30342b;
+  --acbd: #494a3e;
+  --actx: #eee7d8;
+  --acmu: #b4b09f;
+  --acac: #c38b6f;
+  --acgr: #5a7c63;
+  --acth: #30342b;
+  --acrh: rgba(195,139,111,0.10);
+  --acib: #30342b;
+  --acbb: #62604f;
+  --acdb: #22251f;
+  --acdt: #e2e8f0;
+}
+
+.admin-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--acbd);
+  padding-bottom: 20px;
+}
+.admin-header h1 {
+  font-family: var(--display);
+  color: var(--actx);
+  letter-spacing: -1px;
+}
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+.stat-card {
+  background: var(--acbg);
+  border: 1px solid var(--acbd);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.stat-card h3 {
+  font-size: 10px;
+  color: var(--acmu);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: var(--sans);
+}
+.stat-card .value {
+  font-size: 26px;
+  font-weight: 700;
+  font-family: var(--display);
+  color: var(--actx);
+}
+.admin-section {
+  background: var(--acbg);
+  border: 1px solid var(--acbd);
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.admin-section h2 {
+  font-family: var(--display);
+  margin-bottom: 20px;
+  font-size: 22px;
+  color: var(--actx);
+}
+table.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+table.admin-table th, table.admin-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--acbd);
+}
+table.admin-table th {
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  background: var(--acth);
+  color: var(--acmu);
+  font-family: var(--sans);
+}
+table.admin-table td {
+  color: var(--actx);
+  font-size: 13px;
+}
+table.admin-table tr:hover td {
+  background: var(--acrh);
+}
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--sans);
+  letter-spacing: 0.4px;
+  border: 1px solid transparent;
+}
+.badge-admin { background: var(--acac); color: #f7f0e4; }
+.badge-user { background: var(--acbg); color: var(--acmu); border-color: var(--acbd); }
+.badge-banned { background: var(--acbg); color: var(--acmu); border-color: var(--acbd); }
+.badge-active { background: var(--acgr); color: #f7f0e4; }
+.btn-action {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--acbd);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+  font-family: var(--sans);
+  color: var(--actx);
+  background: var(--acib);
+  transition: transform .15s, background .15s, border-color .15s, color .15s;
+}
+.btn-action:hover {
+  transform: translateY(-1px);
+  border-color: var(--acac);
+  color: var(--acac);
+}
+.btn-ban { border-color: var(--acac); color: var(--acac); background: transparent; }
+.btn-ban:hover { background: var(--acac); color: #f7f0e4; border-color: var(--acac); }
+.btn-unban { background: var(--acgr); color: #f7f0e4; border-color: var(--acgr); }
+.btn-unban:hover { background: #2d4632; }
+.btn-role { background: var(--acbg); color: var(--actx); border-color: var(--acbd); }
+.btn-role:hover { border-color: var(--acac); color: var(--acac); }
+.debug-box {
+  background: var(--acdb);
+  color: var(--acdt);
+  padding: 16px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  border: 1px solid var(--acbd);
+}
+.toolbar-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.toolbar-actions input[type="text"] {
+  padding: 8px 12px;
+  border: 1px solid var(--acbb);
+  border-radius: 6px;
+  background: var(--acib);
+  color: var(--actx);
+  font-family: var(--sans);
+  font-size: 13px;
+  flex: 1;
+  max-width: 300px;
+  outline: none;
+}
+.toolbar-actions input[type="text"]:focus {
+  border-color: var(--acac);
+}
+
+/* Antes eran atributos style="" en el HTML/JS (la CSP no permite estilos inline) */
+.button-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+.button-light {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+.table-empty {
+  text-align: center;
+  color: var(--acmu);
+}
+.admin-section-intro {
+  margin-bottom: 15px;
+  color: var(--acmu);
+  font-size: 14px;
+}
+.admin-protected {
+  color: #999;
+  font-size: 12px;
+}

@@ -22,7 +22,8 @@ function makeElement(extra = {}) {
       attributes[name] = String(value);
     },
     addEventListener(type, handler) {
-      (listeners[type] ??= []).push(handler);
+      listeners[type] ??= [];
+      listeners[type].push(handler);
     },
     emit(type) {
       (listeners[type] ?? []).forEach((handler) => handler());

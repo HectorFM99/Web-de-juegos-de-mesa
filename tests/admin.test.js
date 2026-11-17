@@ -717,12 +717,12 @@ test("admin loadDebugInfo respuesta no ok sin mensaje usa statusText", async () 
   assert.strictEqual(elements["debug-output"].textContent, "Error al obtener diagnóstico: Forbidden");
 });
 
-// --- toggleDebugLogs y funciones expuestas en window -------------------------
+// --- toggleDebugLogs y botones con data-action -------------------------------
 
 test("admin toggleDebugLogs escribe cinco líneas de log en debug-output", () => {
   const { elements } = installSeams({ token: "tok" });
-  requireAdmin();
-  global.window.toggleDebugLogs();
+  const { toggleDebugLogs } = requireAdmin();
+  toggleDebugLogs();
   const lines = elements["debug-output"].textContent.split("\n");
   assert.strictEqual(lines.length, 5);
   assert.ok(lines[0].startsWith("[INFO]"));
@@ -730,14 +730,59 @@ test("admin toggleDebugLogs escribe cinco líneas de log en debug-output", () =>
   assert.ok(lines.some((l) => l.startsWith("[DEBUG]")));
 });
 
-test("admin expone sus acciones en window para los onclick del HTML", () => {
-  installSeams({});
-  const mod = requireAdmin();
-  assert.strictEqual(global.window.loadAdminData, mod.loadAdminData);
-  assert.strictEqual(global.window.loadDebugInfo, mod.loadDebugInfo);
-  assert.strictEqual(global.window.toggleBan, mod.toggleBan);
-  assert.strictEqual(global.window.toggleRole, mod.toggleRole);
-  assert.strictEqual(global.window.logoutAdmin, mod.logoutAdmin);
+// Evento de clic falso cuyo target está dentro de un botón con los data-* indicados.
+function clickOn(dataset) {
+  const button = { dataset };
+  return { target: { closest: (selector) => (selector === "[data-action]" ? button : null) } };
+}
+
+test("admin no usa manejadores inline: los botones llevan data-action", () => {
+  const { elements } = installSeams({});
+  const { renderUsers } = requireAdmin();
+  renderUsers([
+    { id: 4, username: "eva", email: "eva@x.com", role: "USER", banned: false, createdAt: "2024-01-01" },
+    { id: 5, username: "jefe", email: "jefe@x.com", role: "ADMIN", banned: false, createdAt: "2024-01-01" }
+  ]);
+  const html = elements["users-table-body"].innerHTML;
+  assert.ok(!/onclick=|style=/.test(html));
+  assert.ok(html.includes('data-action="ban" data-id="4" data-banned="false"'));
+  assert.ok(html.includes('data-action="role" data-id="4" data-role="USER"'));
+  assert.ok(html.includes('class="admin-protected"'));
+});
+
+test("admin handleAdminClick ejecuta la acción del botón pulsado", async () => {
+  const { elements, requests, prompts, confirms } = installSeams({ token: "tok" });
+  const { handleAdminClick } = requireAdmin();
+
+  handleAdminClick(clickOn({ action: "logs" }));
+  assert.ok(elements["debug-output"].textContent.startsWith("[INFO]"));
+
+  handleAdminClick(clickOn({ action: "reload" }));
+  handleAdminClick(clickOn({ action: "debug" }));
+  await flush();
+  assert.ok(requests.some((r) => r.url.endsWith("/admin/users")));
+  assert.ok(requests.some((r) => r.url.endsWith("/admin/debug")));
+
+  handleAdminClick(clickOn({ action: "ban", id: "7", banned: "false" }));
+  await flush();
+  assert.strictEqual(prompts.length, 1);
+  assert.ok(requests.some((r) => r.url.endsWith("/admin/users/7/ban")));
+
+  handleAdminClick(clickOn({ action: "role", id: "8", role: "USER" }));
+  await flush();
+  assert.ok(confirms[0].includes("ADMIN"));
+  assert.ok(requests.some((r) => r.url.endsWith("/admin/users/8/role")));
+
+  handleAdminClick(clickOn({ action: "logout" }));
+  assert.strictEqual(global.window.location.href, "auth.html");
+});
+
+test("admin handleAdminClick ignora clics fuera de botones o con acciones desconocidas", () => {
+  const { requests } = installSeams({ token: "tok" });
+  const { handleAdminClick } = requireAdmin();
+  handleAdminClick({ target: { closest: () => null } });
+  handleAdminClick(clickOn({ action: "desconocida" }));
+  assert.strictEqual(requests.length, 0);
 });
 
 // --- DOMContentLoaded -------------------------------------------------------
@@ -746,13 +791,15 @@ function installWithDomListeners(options) {
   const seams = installSeams(options);
   const docHandlers = {};
   global.document.addEventListener = (type, handler) => {
-    (docHandlers[type] ??= []).push(handler);
+    docHandlers[type] ??= [];
+    docHandlers[type].push(handler);
   };
   const searchHandlers = {};
   seams.elements["user-search"] = {
     value: "",
     addEventListener: (type, handler) => {
-      (searchHandlers[type] ??= []).push(handler);
+      searchHandlers[type] ??= [];
+      searchHandlers[type].push(handler);
     }
   };
   return { ...seams, docHandlers, searchHandlers };
@@ -773,8 +820,9 @@ test("admin DOMContentLoaded comprueba la sesión y filtra al escribir en el bus
       return { ok: true, json: async () => ({}) };
     }
   });
-  requireAdmin();
+  const { handleAdminClick } = requireAdmin();
   docHandlers.DOMContentLoaded.forEach((h) => h());
+  assert.deepStrictEqual(docHandlers.click, [handleAdminClick]);
   await flush();
   await flush();
   assert.ok(requests.some((r) => r.url.includes("/admin/users")));
