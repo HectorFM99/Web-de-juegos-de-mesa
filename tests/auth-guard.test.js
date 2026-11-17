@@ -29,7 +29,8 @@ function installAuthGuardSeams({ pathname, user, token, docReady = "complete" })
   global.document = {
     readyState: docReady,
     addEventListener: (type, handler) => {
-      (handlers[type] ??= []).push(handler);
+      handlers[type] ??= [];
+      handlers[type].push(handler);
     },
     getElementById: (id) => (id === "nav-admin" ? adminLink : null)
   };
@@ -234,4 +235,20 @@ test("auth-guard expone logout en window", () => {
   installAuthGuardSeams({ pathname: "/index.html", user: "{}", token: "tok" });
   requireAuthGuard();
   assert.strictEqual(typeof global.window.logout, "function");
+});
+
+test("auth-guard enlaza el botón de cerrar sesión con addEventListener", () => {
+  const { store } = installAuthGuardSeams({ pathname: "/index.html", user: "{}", token: "tok" });
+  const listeners = {};
+  const logoutButton = {
+    addEventListener: (type, handler) => {
+      listeners[type] = handler;
+    }
+  };
+  global.document.getElementById = (id) => (id === "logout-button" ? logoutButton : null);
+  requireAuthGuard();
+  assert.strictEqual(listeners.click, global.window.logout);
+  listeners.click();
+  assert.strictEqual(store.sobremesa_token, undefined);
+  assert.strictEqual(global.window.location.href, "html/auth.html");
 });

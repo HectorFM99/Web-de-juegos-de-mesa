@@ -2,12 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
+import { helmetOptions, permissionsPolicy } from './security';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Security Headers with Helmet
-  app.use(helmet());
+  // Cabeceras de seguridad HTTP con Helmet (configuración en security.ts)
+  app.use(helmet(helmetOptions));
+  app.use(permissionsPolicy);
 
   // CORS: lista blanca de orígenes. FRONTEND_URL admite varios separados por comas.
   // Por defecto: Docker (8079) y Live Server (5500), tanto con localhost como con 127.0.0.1.

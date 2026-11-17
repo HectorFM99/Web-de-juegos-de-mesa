@@ -7,7 +7,8 @@ test("auth.js switchTab toggles between login and register", () => {
       add: () => {},
       remove: () => {}
     },
-    innerHTML: ""
+    innerHTML: "",
+    addEventListener: () => {}
   });
 
   const elements = {
@@ -315,7 +316,8 @@ test("auth.js switchTab activa el formulario y cambia el texto del pie", () => {
     return {
       classes,
       classList: { add: (c) => classes.add(c), remove: (c) => classes.delete(c) },
-      innerHTML: ""
+      innerHTML: "",
+      addEventListener: () => {}
     };
   };
   const elements = {
@@ -343,4 +345,53 @@ test("auth.js switchTab activa el formulario y cambia el texto del pie", () => {
   assert.ok(elements["tab-login"].classes.has("active"));
   assert.ok(!elements["tab-register"].classes.has("active"));
   assert.ok(elements["auth-footer-text"].innerHTML.includes("Regístrate aquí"));
+});
+
+// Carga auth.js con los elementos de la página de acceso, guardando clases y listeners de cada uno.
+function loadAuthPage() {
+  const ids = ["form-login", "form-register", "tab-login", "tab-register", "auth-footer-text"];
+  const listeners = {};
+  const elements = {};
+  for (const id of ids) {
+    const classes = new Set();
+    elements[id] = {
+      classes,
+      classList: { add: (c) => classes.add(c), remove: (c) => classes.delete(c) },
+      innerHTML: "",
+      addEventListener: (type, handler) => {
+        listeners[`${id}:${type}`] = handler;
+      }
+    };
+  }
+  global.document = { getElementById: (id) => elements[id] || null };
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+  global.window = { location: { href: "" } };
+  delete require.cache[require.resolve("../js/auth.js")];
+  require("../js/auth.js");
+  return { elements, listeners };
+}
+
+test("auth.js enlaza pestañas, pie y formularios con addEventListener (sin inline)", () => {
+  const { elements, listeners } = loadAuthPage();
+
+  assert.strictEqual(listeners["form-login:submit"], global.window.handleLogin);
+  assert.strictEqual(listeners["form-register:submit"], global.window.handleRegister);
+  assert.strictEqual(listeners["tab-login:click"], global.window.handleTabClick);
+  assert.strictEqual(listeners["tab-register:click"], global.window.handleTabClick);
+  assert.strictEqual(listeners["auth-footer-text:click"], global.window.handleTabClick);
+
+  global.window.switchTab("register");
+  assert.ok(!elements["auth-footer-text"].innerHTML.includes("onclick"));
+  assert.ok(elements["auth-footer-text"].innerHTML.includes('data-tab="login"'));
+});
+
+test("auth.js handleTabClick cambia de pestaña según data-tab e ignora otros clics", () => {
+  const { elements } = loadAuthPage();
+
+  const tabButton = { dataset: { tab: "register" } };
+  global.window.handleTabClick({ target: { closest: () => tabButton } });
+  assert.ok(elements["form-register"].classes.has("active"));
+
+  global.window.handleTabClick({ target: { closest: () => null } });
+  assert.ok(elements["form-register"].classes.has("active"));
 });

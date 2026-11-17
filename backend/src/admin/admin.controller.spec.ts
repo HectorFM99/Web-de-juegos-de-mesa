@@ -14,7 +14,8 @@ function makeController(overrides: Record<string, unknown> = {}) {
   const track =
     (name: string, result: unknown) =>
     async (...args: unknown[]) => {
-      (calls[name] ??= []).push(args);
+      calls[name] ??= [];
+      calls[name].push(args);
       return result;
     };
   const service = {

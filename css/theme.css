@@ -21,11 +21,13 @@
 body[data-theme="dark"] {
   color-scheme: dark;
   --paper: #22251f;
+  --paper2: #30342b;
   --paper-dark: #30342b;
   --ink: #eee7d8;
   --muted: #b4b09f;
   --green: #b4c09d;
   --green-dark: #354b39;
+  --rust: #8b4a33;
   --line: #494a3e;
   background: #22251f;
   color: #eee7d8;

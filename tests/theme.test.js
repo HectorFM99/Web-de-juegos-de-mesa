@@ -16,7 +16,8 @@ function makeElement(tag = "button") {
       attributes[name] = String(value);
     },
     addEventListener(type, handler) {
-      (listeners[type] ??= []).push(handler);
+      listeners[type] ??= [];
+      listeners[type].push(handler);
     },
     append(...nodes) {
       this.children.push(...nodes);

@@ -17,7 +17,8 @@ function makePrisma() {
         return { id: 1 };
       },
       findMany: async (args: unknown) => {
-        (calls.findMany ??= []).push(args);
+        calls.findMany ??= [];
+        calls.findMany.push(args);
         return [{ id: 1 }];
       },
     },

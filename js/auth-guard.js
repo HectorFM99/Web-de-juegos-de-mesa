@@ -13,9 +13,6 @@
   }
 
   function checkAdminDisplay() {
-    if (typeof document === 'undefined') {
-      return;
-    }
     const userStrLocal = localStorage.getItem('sobremesa_user');
     let isAdmin = false;
     
@@ -50,11 +47,27 @@
     }
   }
 
+  // Botón "Cerrar sesión" sin onclick inline (la CSP lo bloquea).
+  function bindLogoutButton() {
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', logout);
+    }
+  }
+
+  function onReady() {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    checkAdminDisplay();
+    bindLogoutButton();
+  }
+
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', checkAdminDisplay);
+      document.addEventListener('DOMContentLoaded', onReady);
     } else {
-      checkAdminDisplay();
+      onReady();
     }
   }
 })();

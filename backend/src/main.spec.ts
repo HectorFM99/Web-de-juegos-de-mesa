@@ -50,7 +50,7 @@ async function bootWith(env: Record<string, string | undefined>): Promise<FakeAp
 
 test('main arranca con helmet, CORS por defecto, validación global y puerto 3000', async () => {
   const app = await bootWith({ FRONTEND_URL: undefined, PORT: undefined });
-  assert.strictEqual(app.middlewares.length, 1);
+  assert.strictEqual(app.middlewares.length, 2);
   assert.deepStrictEqual(app.cors.origin, [
     'http://localhost:8079',
     'http://127.0.0.1:8079',
