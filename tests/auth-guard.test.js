@@ -15,7 +15,7 @@ function installAuthGuardSeams({ pathname, user, token, docReady = "complete" })
     store.sobremesa_token = token;
   }
 
-  const adminLink = { style: { display: null } };
+  const adminLink = { style: { display: null }, hidden: true };
   const handlers = {};
 
   global.localStorage = {
@@ -117,27 +117,32 @@ test("auth-guard shows admin link when user has ADMIN role", () => {
   });
   requireAuthGuard();
   assert.strictEqual(adminLink.style.display, "inline-block");
+  assert.strictEqual(adminLink.hidden, false);
 });
 
 test("auth-guard hides admin link when only the user email is admin@lasobremesa.local (role USER)", () => {
   const { adminLink } = installAuthGuardSeams({
     pathname: "/html/admin.html",
-    user: JSON.stringify({ role: "USER", email: "admin@lasobremesa.local" })
+    user: JSON.stringify({ role: "USER", email: "admin@lasobremesa.local" }),
+    token: "tok"
   });
   requireAuthGuard();
-  assert.notStrictEqual(adminLink.style.display, "inline-block");
+  assert.strictEqual(adminLink.style.display, "none");
+  assert.strictEqual(adminLink.hidden, true);
 });
 
 test("auth-guard keeps admin link hidden for a regular user", () => {
   const { adminLink } = installAuthGuardSeams({
     pathname: "/html/admin.html",
-    user: JSON.stringify({ role: "USER", email: "user@test.com" })
+    user: JSON.stringify({ role: "USER", email: "user@test.com" }),
+    token: "tok"
   });
   requireAuthGuard();
-  assert.notStrictEqual(adminLink.style.display, "inline-block");
+  assert.strictEqual(adminLink.style.display, "none");
+  assert.strictEqual(adminLink.hidden, true);
 });
 
-test("auth-guard shows admin link when token payload role is ADMIN", () => {
+test("auth-guard keeps admin link hidden when only the token says ADMIN", () => {
   const payload = Buffer.from(JSON.stringify({ role: "ADMIN", sub: 9 })).toString("base64");
   const { adminLink } = installAuthGuardSeams({
     pathname: "/html/admin.html",
@@ -145,7 +150,8 @@ test("auth-guard shows admin link when token payload role is ADMIN", () => {
     token: `header.${payload}.sig`
   });
   requireAuthGuard();
-  assert.strictEqual(adminLink.style.display, "inline-block");
+  assert.strictEqual(adminLink.style.display, "none");
+  assert.strictEqual(adminLink.hidden, true);
 });
 
 test("auth-guard hides admin link when only the token payload email is admin@lasobremesa.local", () => {
@@ -156,7 +162,8 @@ test("auth-guard hides admin link when only the token payload email is admin@las
     token: `header.${payload}.sig`
   });
   requireAuthGuard();
-  assert.notStrictEqual(adminLink.style.display, "inline-block");
+  assert.strictEqual(adminLink.style.display, "none");
+  assert.strictEqual(adminLink.hidden, true);
 });
 
 test("auth-guard hides admin link when token payload sub is 1 without ADMIN role", () => {
@@ -167,7 +174,8 @@ test("auth-guard hides admin link when token payload sub is 1 without ADMIN role
     token: `header.${payload}.sig`
   });
   requireAuthGuard();
-  assert.notStrictEqual(adminLink.style.display, "inline-block");
+  assert.strictEqual(adminLink.style.display, "none");
+  assert.strictEqual(adminLink.hidden, true);
 });
 
 test("auth-guard ignores malformed token payload", () => {
@@ -177,7 +185,8 @@ test("auth-guard ignores malformed token payload", () => {
     token: "header.notbase64.sig"
   });
   requireAuthGuard();
-  assert.notStrictEqual(adminLink.style.display, "inline-block");
+  assert.strictEqual(adminLink.style.display, "none");
+  assert.strictEqual(adminLink.hidden, true);
 });
 
 test("auth-guard runs checkAdminDisplay on DOMContentLoaded when document is loading", () => {
@@ -228,7 +237,8 @@ test("auth-guard ignora un usuario guardado con JSON malformado", () => {
     token: "tok"
   });
   requireAuthGuard();
-  assert.strictEqual(adminLink.style.display, null);
+  assert.strictEqual(adminLink.style.display, "none");
+  assert.strictEqual(adminLink.hidden, true);
 });
 
 test("auth-guard expone logout en window", () => {

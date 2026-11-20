@@ -1,14 +1,18 @@
+@import url("./tokens.css");
+@import url("./base.css");
+
 :root {
-  --paper: #f5f0e5;
-  --paper-dark: #ebe3d2;
-  --ink: #24261e;
-  --muted: #777666;
-  --green: #354b39;
-  --green-soft: #748365;
-  --rust: #b56445;
-  --line: #d8d0bf;
-  --serif: 'Playfair Display', Georgia, serif;
-  --sans: 'DM Sans', Arial, sans-serif;
+  color-scheme: light;
+  --paper: var(--color-paper);
+  --paper-dark: var(--color-paper-2);
+  --ink: var(--color-ink);
+  --muted: var(--color-muted);
+  --green: var(--color-leaf);
+  --green-soft: var(--color-sand);
+  --rust: var(--color-accent-3);
+  --line: var(--color-rule);
+  --serif: var(--font-display);
+  --sans: var(--font-body);
 }
 * {
   box-sizing: border-box;
@@ -18,10 +22,23 @@ body {
   min-height: 100vh;
   background: var(--paper);
   color: var(--ink);
-  font: 14px var(--sans);
+  font: var(--text-md) var(--sans);
+  line-height: 1.55;
 }
 button {
   font: inherit;
+  border-radius: var(--radius-card);
+  transition: background var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-snap);
+}
+button:hover {
+  opacity: 0.95;
+}
+button:active {
+  transform: scale(0.97);
+}
+button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 .game-header {
   min-height: 76px;
