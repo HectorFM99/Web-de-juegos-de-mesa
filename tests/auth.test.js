@@ -52,7 +52,8 @@ test("auth.js handleLogin success", async () => {
       if (id === 'login-email') return { value: 'test@test.com' };
       if (id === 'login-password') return { value: 'password123' };
       return null;
-    }
+    },
+    querySelector: (selector) => selector === '.auth-submit' ? { innerHTML: "Entrar", disabled: false } : null
   };
   global.fetch = async () => ({
     ok: true,
@@ -82,7 +83,8 @@ test("auth.js handleLogin failure with alert message", async () => {
       if (id === 'login-email') return { value: 'test@test.com' };
       if (id === 'login-password') return { value: 'wrong' };
       return null;
-    }
+    },
+    querySelector: (selector) => selector === '.auth-submit' ? { innerHTML: "Entrar", disabled: false } : null
   };
   global.fetch = async () => ({
     ok: false,
@@ -113,7 +115,8 @@ test("auth.js handleLogin sin backend avisa y no crea sesión falsa", async () =
       if (id === 'login-email') return { value: 'offline@test.com' };
       if (id === 'login-password') return { value: 'password' };
       return null;
-    }
+    },
+    querySelector: (selector) => selector === '.auth-submit' ? { innerHTML: "Entrar", disabled: false } : null
   };
   global.fetch = async () => { throw new Error('Network error'); };
 
@@ -141,7 +144,8 @@ test("auth.js handleRegister success", async () => {
       if (id === 'reg-email') return { value: 'new@test.com' };
       if (id === 'reg-password') return { value: 'password123' };
       return null;
-    }
+    },
+    querySelector: (selector) => selector === '.auth-submit' ? { innerHTML: "Entrar", disabled: false } : null
   };
   global.fetch = async () => ({
     ok: true,
@@ -172,7 +176,8 @@ test("auth.js handleRegister failure with array message", async () => {
       if (id === 'reg-email') return { value: 'bad' };
       if (id === 'reg-password') return { value: '123' };
       return null;
-    }
+    },
+    querySelector: (selector) => selector === '.auth-submit' ? { innerHTML: "Entrar", disabled: false } : null
   };
   global.fetch = async () => ({
     ok: false,
@@ -203,7 +208,8 @@ test("auth.js handleRegister sin backend avisa y no crea sesión falsa", async (
       if (id === 'reg-email') return { value: 'off@test.com' };
       if (id === 'reg-password') return { value: 'password' };
       return null;
-    }
+    },
+    querySelector: (selector) => selector === '.auth-submit' ? { innerHTML: "Entrar", disabled: false } : null
   };
   global.fetch = async () => { throw new Error('Network error'); };
 
@@ -265,7 +271,8 @@ function installAuthSeams({ fetchImpl, fields = {} } = {}) {
   global.window = { location: { href: "" } };
   global.alert = (msg) => alerts.push(msg);
   global.document = {
-    getElementById: (id) => (id in fields ? { value: fields[id] } : null)
+    getElementById: (id) => (id in fields ? { value: fields[id] } : null),
+    querySelector: () => null
   };
   global.fetch = fetchImpl;
   delete require.cache[require.resolve("../js/auth.js")];
