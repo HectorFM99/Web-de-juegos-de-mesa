@@ -1,14 +1,18 @@
+@import url("./tokens.css");
+@import url("./base.css");
+
 :root {
-  --paper:#f5f0e5;
-  --paper2:#ebe3d2;
-  --ink:#24261e;
-  --muted:#777666;
-  --green:#4b6149;
-  --green-dark:#354b39;
-  --rust:#b56445;
-  --line:#d8d0bf;
-  --display:'Playfair Display',Georgia,serif;
-  --sans:'DM Sans',Arial,sans-serif
+  color-scheme: light;
+  --paper: var(--color-paper);
+  --paper2: var(--color-paper-2);
+  --ink: var(--color-ink);
+  --muted: var(--color-muted);
+  --green: var(--color-leaf);
+  --green-dark: var(--color-mint-deep);
+  --rust: var(--color-accent-3);
+  --line: var(--color-rule);
+  --display: var(--font-display);
+  --sans: var(--font-body);
 }
 * {
   box-sizing:border-box
@@ -67,6 +71,9 @@ a {
   display: none;
   color: #1e40af;
   font-weight: 600;
+}
+.main-nav .nav-admin[hidden] {
+  display: none !important;
 }
 .main-nav .nav-button {
   background: none;
@@ -140,10 +147,19 @@ h1 em,h2 em {
   padding:14px 18px;
   font-size:10px;
   font-weight:700;
-  transition:transform .2s,background .2s
+  border-radius: var(--radius-card);
+  transition:transform var(--dur-short) var(--ease-snap), background var(--dur-short) var(--ease-out), opacity var(--dur-short) var(--ease-out);
 }
 .button:hover {
-  transform:translateY(-2px)
+  transform:translateY(-2px);
+  opacity: 0.95;
+}
+.button:active {
+  transform: translateY(0) scale(0.97);
+}
+.button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 .button-dark {
   background:var(--green-dark);
@@ -194,6 +210,8 @@ h1 em,h2 em {
   position:relative;
   background:#e9dfcd;
   overflow:hidden;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
   background-image:radial-gradient(#c8bda7 .6px,transparent .6px);
   background-size:5px 5px
 }
@@ -409,15 +427,19 @@ h2 {
 .filter {
   border:0;
   background:transparent;
-  border-radius:30px;
+  border-radius:var(--radius-pill);
   padding:8px 11px;
-  color:#737164;
+  color:var(--color-muted);
   font:10px var(--sans);
-  cursor:pointer
+  cursor:pointer;
+  transition:background var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-snap);
 }
 .filter:hover,.filter.active {
-  background:var(--green-dark);
-  color:#fff8eb
+  background:var(--color-accent);
+  color:var(--color-accent-ink);
+}
+.filter:active {
+  transform: scale(0.95);
 }
 .filter span {
   font-size:8px;
@@ -434,7 +456,15 @@ h2 {
   gap:35px 23px
 }
 .game-card {
-  min-width:0
+  min-width:0;
+  border-radius: var(--radius-card);
+  background: var(--color-card);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-short) var(--ease-spring), box-shadow var(--dur-short) var(--ease-out);
+}
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 1px 2px oklch(20% 0.014 255 / 0.06), 0 20px 40px -14px oklch(20% 0.014 255 / 0.28);
 }
 .game-card[hidden] {
   display:none
@@ -651,18 +681,21 @@ h2 {
 .play-link {
   width:29px;
   height:29px;
-  border:1px solid #c8c0ae;
+  border:var(--rule-hair) solid var(--color-edge);
   border-radius:50%;
   display:grid;
   place-items:center;
   font-size:14px;
-  transition:.2s
+  transition:border-color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-snap)
 }
 .play-link:hover {
-  background:var(--green-dark);
-  color:white;
-  border-color:var(--green-dark);
+  background:var(--color-accent);
+  color:var(--color-accent-ink);
+  border-color:var(--color-accent);
   transform:rotate(45deg)
+}
+.play-link:active {
+  transform: rotate(45deg) scale(0.95)
 }
 .game-description {
   font-size:10px;
@@ -1011,4 +1044,28 @@ footer {
     transition:none!important
   }
 
+}
+
+/* ==========================================
+   Sello Hallmark — Tema Hum (género playful)
+   Papel crema cálido • Chillax rounded sans
+   Acento amarillo cromático • Radios 24px
+   ========================================== */
+.hallmark-stamp {
+  position: fixed;
+  bottom: var(--space-sm);
+  right: var(--space-sm);
+  z-index: var(--z-toast);
+  font: var(--text-xs) var(--font-outlier);
+  color: var(--color-muted);
+  background: var(--color-card);
+  border: var(--rule-hair) solid var(--color-edge);
+  border-radius: var(--radius-card);
+  padding: var(--space-xs) var(--space-sm);
+  box-shadow: var(--shadow-card);
+  opacity: 0.7;
+  transition: opacity var(--dur-short) var(--ease-out);
+}
+.hallmark-stamp:hover {
+  opacity: 1;
 }

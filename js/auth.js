@@ -27,6 +27,13 @@ function switchTab(tab) {
 
 async function authenticateUser(endpoint, payload) {
   try {
+    const submitBtn = typeof document?.querySelector === 'function' ? document.querySelector('.auth-submit') : null;
+    const originalText = submitBtn?.innerHTML;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Procesando... <span>⟳</span>';
+    }
+
     const res = await fetch(`http://localhost:3000/auth/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -36,7 +43,16 @@ async function authenticateUser(endpoint, payload) {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(Array.isArray(data.message) ? data.message.join(', ') : (data.message || 'Error en la autenticación.'));
+      const errorMsg = Array.isArray(data.message) ? data.message.join(', ') : (data.message || 'Error en la autenticación.');
+      if (typeof alert === 'function') {
+        alert(errorMsg);
+      } else {
+        console.error(errorMsg);
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
       return;
     }
 
@@ -46,9 +62,18 @@ async function authenticateUser(endpoint, payload) {
     }
     window.location.href = '../index.html';
   } catch (error) {
-    // Sin backend no hay sesión válida: no se crea una sesión falsa (sin rol ni token).
     console.error('No se pudo conectar con el backend:', error);
-    alert('No se pudo conectar con el servidor. Inténtalo de nuevo en unos minutos.');
+    const serverErrorMsg = 'No se pudo conectar con el servidor. Inténtalo de nuevo en unos minutos.';
+    if (typeof alert === 'function') {
+      alert(serverErrorMsg);
+    } else {
+      console.error(serverErrorMsg);
+    }
+    const submitBtn = typeof document?.querySelector === 'function' ? document.querySelector('.auth-submit') : null;
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Entrar a la partida <span>→</span>';
+    }
   }
 }
 

@@ -1,3 +1,11 @@
+function logout() {
+  localStorage.removeItem('sobremesa_user');
+  localStorage.removeItem('sobremesa_token');
+  const inHtmlDir = window.location.pathname.includes('/html/');
+  window.location.href = inHtmlDir ? 'auth.html' : 'html/auth.html';
+}
+window.logout = logout;
+
 (function() {
   const isAuthPage = window.location.pathname.includes('auth.html');
   const userStr = localStorage.getItem('sobremesa_user');
@@ -15,7 +23,7 @@
   function checkAdminDisplay() {
     const userStrLocal = localStorage.getItem('sobremesa_user');
     let isAdmin = false;
-    
+
     if (userStrLocal) {
       try {
         const user = JSON.parse(userStrLocal);
@@ -27,23 +35,16 @@
       }
     }
 
-    const token = localStorage.getItem('sobremesa_token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role === 'ADMIN') {
-          isAdmin = true;
-        }
-      } catch {
-        // Ignored
-      }
+    const adminLink = document.getElementById('nav-admin');
+    if (!adminLink) {
+      return;
     }
-
     if (isAdmin) {
-      const adminLink = document.getElementById('nav-admin');
-      if (adminLink) {
-        adminLink.style.display = 'inline-block';
-      }
+      adminLink.hidden = false;
+      adminLink.style.display = 'inline-block';
+    } else {
+      adminLink.hidden = true;
+      adminLink.style.display = 'none';
     }
   }
 
@@ -51,7 +52,7 @@
   function bindLogoutButton() {
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
-      logoutButton.addEventListener('click', logout);
+      logoutButton.addEventListener('click', window.logout);
     }
   }
 
@@ -71,11 +72,3 @@
     }
   }
 })();
-
-function logout() {
-  localStorage.removeItem('sobremesa_user');
-  localStorage.removeItem('sobremesa_token');
-  const inHtmlDir = window.location.pathname.includes('/html/');
-  window.location.href = inHtmlDir ? 'auth.html' : 'html/auth.html';
-}
-window.logout = logout;
